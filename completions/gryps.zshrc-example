@@ -1,0 +1,6 @@
+# GRYPS 1.3.3 — ~/.zshrc, po compinit
+# Same komendy GRYPS są wypisywane pojedynczo i grupami przez compadd -l/-V.
+# Pozostałe dopełnienia (pliki, gałęzie) używają standardowego Zsh.
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%B%d%b'
+zstyle ':completion:*' menu select

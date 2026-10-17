@@ -1,0 +1,4 @@
+# GRYPS 1.3.3 — ~/.blerc (po wczytaniu ble.sh)
+# Widok PIONOWY: jeden gryps na linię, opis z Gitem na końcu.
+# Pusta wartość menu_desc_multicolumn_width wyłącza drugą kolumnę.
+ble-import core-complete -C 'bleopt complete_menu_style=desc menu_desc_multicolumn_width='

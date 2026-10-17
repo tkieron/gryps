@@ -1,0 +1,120 @@
+#compdef gryps
+# GRYPS 1.3.3 — każda podpowiedź w osobnym wierszu, stała kolejność grup.
+# Warto ustawić w ~/.zshrc: zstyle ':completion:*' group-name ''
+# oraz zstyle ':completion:*:descriptions' format '%B%d%b'
+
+local -a gryps_branches gryps_remote gryps_commits gryps_tags gryps_stashes
+local -a gryps_robota gryps_cele gryps_dochodzenie gryps_dziupla gryps_ratunek gryps_pomoc gryps_aliasy
+gryps_robota=(
+    'mury:Postaw nową celę — git init'
+    'jumaj:Zwiń repo z wolki — git clone'
+    'lipo:Co słychać pod celą? — git status -sb'
+    'kwity:Wyciągnij dowody zmian — git diff + git diff --cached'
+    'skitrac:Schowaj fanty do indeksu — git add [-A]'
+    'odkitraj:Wyjmij z indeksu, nie z dysku — git restore --staged'
+    'przyklep:Podpisz się pod robotą — git commit'
+    'wywozka:Wyślij urobek na wolkę — git push'
+    'rakowiec:Odbierz paczkę bez merge — git pull --ff-only'
+    'ucho:Posłuchaj co na serwerze — git fetch'
+)
+gryps_cele=(
+    'celka:Lista cel i nowe cele — git branch'
+    'przerzutka:Zmień celę — git switch'
+    'spacer:Przejdź w historię — git checkout'
+    'blaty:Dogadaj gałęzie — git merge'
+    'uklady:Sprawdź kontakty z wolką — git remote -v'
+)
+gryps_dochodzenie=(
+    'kapus:Kto sypnął tę linijkę? — git blame'
+    'wizjer:Zajrzyj w wybraną akcję — git show'
+    'bialko:Prześwietl historię — git log'
+    'cynk:Tropy po ruchach HEAD — git reflog'
+    'dziara:Wydziaraj wersję — git tag'
+)
+gryps_dziupla=(
+    'dziupla:Schowaj także nowe fanty — git stash push -u'
+    'wyjmij:Wyjmij fanty z dziupli — git stash pop'
+    'spis:Co leży w dziupli? — git stash list'
+    'spusc:Spuść wybraną dziuplę — git stash drop'
+)
+gryps_ratunek=(
+    'kasacja:Odwróć wyrok nowym commitem — git revert'
+    'odkrec:Odkręć niezapisane zmiany — git restore --worktree'
+    'kipisz:Twardy reset! Ostrożnie — git reset --hard'
+)
+gryps_pomoc=(
+    'pomoc:Pełen regulamin celi — gryps pomoc'
+    'kmina:Rozkmiń jeden gryps — gryps kmina'
+    'bajera:Nauka pod celą — gryps bajera'
+    'podpowiedzi:Spis grypsów i ich znaczeń — gryps podpowiedzi'
+    'wersja:Numer aktualnej odsiadki — gryps wersja'
+)
+gryps_aliasy=(
+    'kopsnij:Alias wywózki — git push'
+    'rakieta:Alias rakowca — git pull --ff-only'
+    'stojka:Alias ucha — git fetch'
+    'zblatuj:Alias blatów — git merge'
+)
+
+# compadd -l: Zsh pokazuje każdy wynik OSOBNO, nie w kolumnach.
+# -V: zachowuje kolejność z katalogu zamiast sortowania alfabetem.
+# -X: nagłówek grupy. -d: tekst pokazywany, niezależny od wpisywanej nazwy.
+_gryps_line_group() {
+    local group="$1" heading="$2" entry name
+    shift 2
+    local -a names display
+    for entry in "$@"; do
+        name="${entry%%:*}"
+        names+=("$name")
+        display+=("${(r:15:)name} ${entry#*:}")
+    done
+    (( ${#names} )) || return 1
+    compadd -Q -l -V "$group" -X "$heading" -d display -- "${names[@]}"
+}
+
+_gryps_all_groups() {
+    local ret=1
+    _gryps_line_group gryps-robota '📦 CODZIENNA ROBOTA' "${gryps_robota[@]}" && ret=0
+    _gryps_line_group gryps-cele '🚪 CELE I UKŁADY' "${gryps_cele[@]}" && ret=0
+    _gryps_line_group gryps-dochodzenie '🕵️ DOCHODZENIE' "${gryps_dochodzenie[@]}" && ret=0
+    _gryps_line_group gryps-dziupla '🕳️ DZIUPLA' "${gryps_dziupla[@]}" && ret=0
+    _gryps_line_group gryps-ratunek '🚨 RATUNEK' "${gryps_ratunek[@]}" && ret=0
+    _gryps_line_group gryps-pomoc '📖 POMOC' "${gryps_pomoc[@]}" && ret=0
+    _gryps_line_group gryps-aliasy '🔁 ZAMIENNIKI' "${gryps_aliasy[@]}" && ret=0
+    return $ret
+}
+
+local gryps_cmd_index=2
+[[ "${words[2]:-}" == --cicho ]] && gryps_cmd_index=3
+if (( CURRENT == gryps_cmd_index )); then
+    _gryps_all_groups
+    return
+fi
+
+case "${words[gryps_cmd_index]}" in
+    kmina) _gryps_all_groups ;;
+    kapus|skitrac|odkrec|odkitraj|kwity|spacer|jumaj)
+        # Prawdziwe pliki, także po `--` i po opcjach takich jak `-L`.
+        _files ;;
+    przerzutka|blaty|zblatuj)
+        gryps_branches=("${(@f)$(command git branch --format='%(refname:short)' 2>/dev/null)}")
+        (( ${#gryps_branches} )) && _describe -t gryps-git-branches '🚪 Gałęzie — git branch' gryps_branches ;;
+    celka)
+        if [[ "${words[gryps_cmd_index+1]:-}" == -d || "${words[gryps_cmd_index+1]:-}" == -D ]]; then
+            gryps_branches=("${(@f)$(command git branch --format='%(refname:short)' 2>/dev/null)}")
+            (( ${#gryps_branches} )) && _describe -t gryps-git-branches '🚪 Gałęzie — git branch' gryps_branches
+        fi ;;
+    uklady|wywozka|kopsnij|ucho|stojka|rakowiec|rakieta)
+        gryps_remote=("${(@f)$(command git remote 2>/dev/null)}")
+        (( ${#gryps_remote} )) && _describe -t gryps-remotes '📡 Zdalne serwery — git remote' gryps_remote ;;
+    dziara)
+        gryps_tags=("${(@f)$(command git tag --list 2>/dev/null)}")
+        (( ${#gryps_tags} )) && _describe -t gryps-tags '🏷️ Tagi — git tag' gryps_tags ;;
+    kasacja|wizjer)
+        gryps_commits=("${(@f)$(command git log -n 30 --format='%h' 2>/dev/null)}")
+        (( ${#gryps_commits} )) && _describe -t gryps-commits '📜 Commity — git log' gryps_commits ;;
+    wyjmij|spusc)
+        gryps_stashes=("${(@f)$(command git stash list --format='%gd' 2>/dev/null)}")
+        (( ${#gryps_stashes} )) && _describe -t gryps-stashes '🕳️ Schowane fanty — git stash list' gryps_stashes ;;
+    *) _files ;;
+esac

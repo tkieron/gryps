@@ -1,0 +1,200 @@
+'\" -*- coding: UTF-8 -*-
+.\" Strona podręcznika dla gryps(1)
+.TH GRYPS 1 "2026-10-17" "gryps __VERSION__" "Podręcznik Gryps"
+.SH NAZWA
+gryps \- Git w grypserze, system kontroli wersji dla prawilnych ludzi
+.SH SKŁADNIA
+.B gryps
+.I komenda
+.RI [ argumenty ...]
+.br
+.B gryps
+.I komenda
+.B \-h
+.br
+.B gryps
+.RB [ pomoc | bajera | wersja ]
+.SH OPIS
+.B gryps
+to cienka nakładka na
+.BR git (1),
+która nadaje codziennym komendom nazwy z gwary więziennej (grypsery).
+Każda komenda gryps wywołuje odpowiednią komendę git i przekazuje jej
+argumenty do Git (z wyjątkami opisanych skrótów), więc opcje Gita działają.
+Gryps dokłada czytelne komunikaty, kilka ułatwień i zabezpieczenia
+przed nieodwracalnymi akcjami.
+.PP
+Czego gryps nie tłumaczy, robisz zwykłym
+.BR git .
+.SH PODSTAWOWA ROBOTA
+.TP
+.BR mury " [folder]"
+Stawia mury nowej celi, czyli zakłada repozytorium.
+.RB ( "git init" )
+.TP
+\fBjumaj\fR \fIurl\fR [\fIfolder\fR]
+Zawija (klonuje) repozytorium z wolki na dysk.
+.RB ( "git clone" )
+.TP
+.B lipo
+Patrzysz przez lipo (oko) na celę: co zmienione, co skitrane, co nowe.
+.RB ( "git status" )
+.TP
+.BR skitrac " [plik...]"
+Kitra fanty do poczekalni przed przyklepaniem. Bez argumentów kitra
+wszystko w całym repo, łącznie z usuniętymi plikami.
+.RB ( "git add \-A" " / " "git add" )
+.TP
+.BI przyklep " wiadomość"
+Przyklepuje skitrane zmiany. Flaga \fB\-m\fP nie jest potrzebna; cały
+wyrazy przed pierwszą opcją stają się opisem commita; opcje po opisie
+(np. \fB\-\-no-verify\fP, \fB\-\-amend\fP) trafiają do Git.
+Jeśli pierwszy argument zaczyna się od \fB\-\fP, argumenty idą do Git
+bez zmian, np. \fBgryps przyklep \-m "opis" \-\-amend\fP.
+.RB ( "git commit \-m" )
+.TP
+.BR wywozka ", " kopsnij
+Wywozi przyklepane commity na serwer. Przy pierwszym pushu bez argumentów
+i bez upstreamu używa konfiguracji Git do wyboru zdalnego serwera
+(branch.<nazwa>.pushRemote, remote.pushDefault itp.) i ustawia upstream
+przy push.default=simple/upstream/current; dla matching/nothing nie zmienia
+natywnego działania Git. Z argumentami działa jak zwykły git push.
+.RB ( "git push" )
+.TP
+.BR rakowiec ", " rakieta
+Odbiera rakietę (paczkę) z wolki. Domyślnie tylko fast-forward (--ff-only); nie robi samowolnego merge/rebase.
+.RB ( "git pull" )
+.TP
+.BR ucho ", " stojka
+Stójka przy drzwiach: sprawdza, co nowego na serwerze, bez ruszania plików.
+.RB ( "git fetch" )
+.SH RUCHY POD CELĄ
+.TP
+.BR celka " [nazwa]"
+Bez argumentów pokazuje listę cel (gałęzi), z nazwą zakłada nową.
+\fBgryps celka \-d\fP \fInazwa\fP likwiduje celkę.
+.RB ( "git branch" )
+.TP
+.BI przerzutka " celka"
+Przeniesienie do innej celi. \fB\-c\fP \fInazwa\fP buduje nową i od razu
+do niej wchodzi, \fB\-\fP wraca do poprzedniej.
+.RB ( "git switch" )
+.TP
+.BI spacer " celka|hash|plik"
+Klasyczne przejście po historii albo cofnięcie zmian w pliku.
+.RB ( "git checkout" )
+.TP
+.BR blaty ", " zblatuj " \fIcelka\fP"
+Łączy urobek z podanej celi z obecną. Przy konflikcie podpowiada,
+co zrobić dalej.
+.RB ( "git merge" )
+.TP
+.BR wizjer " [hash]"
+Zagląda przez wizjer w szczegóły commita.
+.RB ( "git show" )
+.TP
+.BR bialko " [opcje]"
+Wyciąga kwity: bez argumentów rysuje zwięzły graf wszystkich cel,
+z argumentami działa jak zwykły log.
+.RB ( "git log \-\-graph \-\-oneline \-\-decorate \-\-all" )
+.SH DZIUPLA
+.TP
+.B dziupla
+Chowa zmiany śledzonych ORAZ nowych nieśledzonych plików (-u). Nie obejmuje
+plików ignorowanych; jawne --all może również objąć pliki ignorowane.
+.RB ( "git stash push" )
+.TP
+.B wyjmij
+Wyciąga ostatnią dziuplę z powrotem na blat.
+.RB ( "git stash pop" )
+.TP
+.B spis
+Lista wszystkich dziupli.
+.RB ( "git stash list" )
+.TP
+.BR spusc " [\-f]"
+Bezpowrotnie kasuje dziuplę. Pyta o potwierdzenie; \fB\-f\fP pomija pytanie.
+.RB ( "git stash drop" )
+.SH AWARYJNE I EDUKACYJNE
+.TP
+.BR kipisz " [\-f]"
+Rewizja: niszczy nieprzyklepane zmiany plików ŚLEDZONYCH i przywraca je
+do HEAD. Nie wykonuje git clean: nieśledzone pliki zwykle pozostają, chyba że
+blokują przywracanie plików śledzonych.
+Najpierw pokazuje status i pyta o potwierdzenie. Bez terminala odmawia,
+chyba że podasz \fB\-f\fP.
+.RB ( "git reset \-\-hard" )
+.TP
+.BR pomoc ", " \-h
+Lista komend. Długi tekst otwiera się w
+.BR less (1)
+z możliwością przewijania.
+.TP
+.B bajera
+Samouczek: typowy dzień na robocie krok po kroku.
+.TP
+.BI kmina " komenda"
+Szczegółowy opis jednej komendy (to samo co \fIkomenda\fP \fB\-h\fP).
+.TP
+.BR wersja ", " \-v
+Wersja Grypsu.
+.SH PRZYKŁADY
+.nf
+gryps jumaj https://github.com/ekipa/projekt.git
+gryps przerzutka \-c nowa\-robota
+gryps skitrac
+gryps przyklep "Naprawiony zamek w drzwiach"
+gryps wywozka
+.fi
+.PP
+Awaryjna przerzutka z rozgrzebanym kodem:
+.nf
+gryps dziupla && gryps przerzutka hotfix
+gryps przerzutka \- && gryps wyjmij
+.fi
+.SH ŚRODOWISKO
+.TP
+.B NO_COLOR
+Gdy ustawiona, gryps nie koloruje wyjścia. Kolory wyłączają się też same,
+kiedy wyjście idzie do pliku lub potoku.
+.SH KOD WYJŚCIA
+Gryps zwraca kod wyjścia wywołanej komendy git. Własne błędy
+(zły argument, brak repozytorium, odmowa potwierdzenia) dają 1.
+.SH ZOBACZ TEŻ
+.BR git (1),
+.BR less (1)
+.PP
+Słownik gwary więziennej:
+https://www.zpozdrowieniem.pl/blog/gamzac\-grypsem\-slownik\-gwary\-wieziennej
+
+.SH GRYPS 1.3.0
+.TP
+.B kwity
+Wyswietla git diff unstaged oraz staged. Opcja --staged ogranicza do indeksu.
+.TP
+.B odkitraj
+Wycofuje staging bez utraty plikow (git restore --staged).
+.TP
+.B kapus
+Historia autorow linii: git blame. Wymaga pliku.
+.TP
+.B dziara
+Lista/utworzenie taga git tag.
+.TP
+.B cynk
+Ostatnie 20 wpisow git reflog HEAD.
+.TP
+.B kasacja
+Odwraca wskazany commit przez git revert --no-edit.
+.TP
+.B uklady
+Adresy zdalnych repozytoriow (git remote -v) lub podkomendy remote.
+.TP
+.B odkrec
+Porzuca jedynie zmiany unstaged (git restore --worktree), wymaga sciezki i potwierdzenia. -f pomija potwierdzenie.
+.TP
+.B --cicho
+Globalna opcja przed komenda wylacza komentarze grypsowe, ale zachowuje dane Git.
+.PP
+Dziupla bez argumentow ukrywa takze niesledzone pliki (-u), ale nie ignorowane.
+Rakowiec bez wskazanej strategii pull uzywa --ff-only.

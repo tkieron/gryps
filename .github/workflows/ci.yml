@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Testy (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04, macos-14, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Testy macOS na systemowym Bash 3.2
+        if: runner.os == 'macOS'
+        run: |
+          /bin/bash --version | head -n 1
+          PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH" make test TEST_BASH=/bin/bash
+          make macos
+          for script in packaging/macos/*.sh; do sh -n "$script"; done
+
+      - name: Testy Linux
+        if: runner.os == 'Linux'
+        run: make test
+
+  lint:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make lint
+
+  deb:
+    name: Paczka .deb
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Budowa i instalacja
+        run: |
+          make deb
+          sudo apt-get install -y ./dist/gryps_*_all.deb
+          gryps wersja
+          man -w gryps
+          GRYPS="$(command -v gryps)" bash tests/run.sh
+          GRYPS="$(command -v gryps)" bash tests/test-v13.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gryps-deb
+          path: dist/*.deb

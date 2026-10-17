@@ -1,0 +1,37 @@
+# Grupa | Gryps | Znaczenie | Odpowiednik Git (ostatnie pole)
+robota|mury|Postaw nową celę|git init
+robota|jumaj|Zwiń repo z wolki|git clone
+robota|lipo|Co słychać pod celą?|git status -sb
+robota|kwity|Wyciągnij dowody zmian|git diff + git diff --cached
+robota|skitrac|Schowaj fanty do indeksu|git add [-A]
+robota|odkitraj|Wyjmij z indeksu, nie z dysku|git restore --staged
+robota|przyklep|Podpisz się pod robotą|git commit
+robota|wywozka|Wyślij urobek na wolkę|git push
+robota|rakowiec|Odbierz paczkę bez merge|git pull --ff-only
+robota|ucho|Posłuchaj co na serwerze|git fetch
+cele|celka|Lista cel i nowe cele|git branch
+cele|przerzutka|Zmień celę|git switch
+cele|spacer|Przejdź w historię|git checkout
+cele|blaty|Dogadaj gałęzie|git merge
+cele|uklady|Sprawdź kontakty z wolką|git remote -v
+dochodzenie|kapus|Kto sypnął tę linijkę?|git blame
+dochodzenie|wizjer|Zajrzyj w wybraną akcję|git show
+dochodzenie|bialko|Prześwietl historię|git log
+dochodzenie|cynk|Tropy po ruchach HEAD|git reflog
+dochodzenie|dziara|Wydziaraj wersję|git tag
+dziupla|dziupla|Schowaj także nowe fanty|git stash push -u
+dziupla|wyjmij|Wyjmij fanty z dziupli|git stash pop
+dziupla|spis|Co leży w dziupli?|git stash list
+dziupla|spusc|Spuść wybraną dziuplę|git stash drop
+ratunek|kasacja|Odwróć wyrok nowym commitem|git revert
+ratunek|odkrec|Odkręć niezapisane zmiany|git restore --worktree
+ratunek|kipisz|Twardy reset! Ostrożnie|git reset --hard
+pomoc|pomoc|Pełen regulamin celi|gryps pomoc
+pomoc|kmina|Rozkmiń jeden gryps|gryps kmina
+pomoc|bajera|Nauka pod celą|gryps bajera
+pomoc|podpowiedzi|Spis grypsów i ich znaczeń|gryps podpowiedzi
+pomoc|wersja|Numer aktualnej odsiadki|gryps wersja
+aliasy|kopsnij|Alias wywózki|git push
+aliasy|rakieta|Alias rakowca|git pull --ff-only
+aliasy|stojka|Alias ucha|git fetch
+aliasy|zblatuj|Alias blatów|git merge
