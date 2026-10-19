@@ -305,7 +305,7 @@ def record_terminal():
     subprocess.run(["git", "switch", "-qc", "do-ziomka"], cwd=cwd, env=env, check=True)
     with open(os.path.join(cwd, "gryps.txt"), "w") as f:
         f.write("Pozdro z celi 14\n")
-    steps = ["gryps skitrac", 'gryps przyklep "Pozdro z celi 14"', "gryps wywozka"]
+    steps = ["gryps skitraj", 'gryps przyklep "Pozdro z celi 14"', "gryps wywozka"]
     rec = R.Recorder(cols=cols, rows=rows, font_size=fs, title="cela 14 — gryps")
     starts, typing = [], []
     elapsed = lambda: sum(ms for _, ms in rec.frames) / 1000  # noqa: E731
@@ -388,7 +388,7 @@ def end_card(c, t):
         S.paste_center(c, layer, 640, *sl)
     items = [
         (0.25, S.fit("Git w grypserze", 92, 980, color=S.WHITE), 900),
-        (0.55, S.fit("skitrac · przyklep · wywozka · kipisz", 44, 980, color=S.GREY, path=S.MONO_B), 1010),
+        (0.55, S.fit("skitraj · przyklep · wywozka · kipisz", 44, 980, color=S.GREY, path=S.MONO_B), 1010),
         (0.85, S.fit(f"github.com/{S.GH_USER}/gryps" if S.GH_USER else "link w bio 🔗", 66, 980,
                      color=S.YELLOW, path=S.MONO_B), 1150),
         (1.15, S.fit("⭐ w celi każda paczka się liczy", 48, 980, color=S.WHITE, path=S.SANS), 1265),

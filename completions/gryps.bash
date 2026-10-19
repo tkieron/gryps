@@ -1,4 +1,4 @@
-# GRYPS 1.3.4 — TAB: Bash 3.2+, ble.sh 0.4+ (optional)
+# GRYPS 1.4.1 — TAB: Bash 3.2+, ble.sh 0.4+ (optional)
 # Trzymamy czyste wartości COMPREPLY w zwykłym Bashu. Nie dopisujemy opisów
 # do nazw kandydatów, ponieważ TAB wstawiłby opis zamiast samej komendy.
 # W ble.sh, jeśli dostępne jest jego API kandydatów, przekazujemy osobny opis.
@@ -19,21 +19,23 @@ _gryps_meta() {
         jumaj) REPLY='[📦 CODZIENNA ROBOTA] Zwiń repo z wolki — git clone' ;;
         lipo) REPLY='[📦 CODZIENNA ROBOTA] Co słychać pod celą? — git status -sb' ;;
         kwity) REPLY='[📦 CODZIENNA ROBOTA] Wyciągnij dowody zmian — git diff + git diff --cached' ;;
-        skitrac) REPLY='[📦 CODZIENNA ROBOTA] Schowaj fanty do indeksu — git add [-A]' ;;
+        skitraj) REPLY='[📦 CODZIENNA ROBOTA] Schowaj fanty do indeksu — git add [-A]' ;;
         odkitraj) REPLY='[📦 CODZIENNA ROBOTA] Wyjmij z indeksu, nie z dysku — git restore --staged' ;;
-        ksywa) REPLY='[🪪 KARTOTEKA] Ustaw ksywę autora — git config user.name' ;;
-        meta) REPLY='[🪪 KARTOTEKA] Ustaw metę autora — git config user.email' ;;
-        meldunek) REPLY='[🪪 KARTOTEKA] Zameldowanie w dwóch ruchach — git config user.*' ;;
-        kartoteka) REPLY='[🪪 KARTOTEKA] Kto i skąd? — git config --show-origin' ;;
         przyklep) REPLY='[📦 CODZIENNA ROBOTA] Podpisz się pod robotą — git commit' ;;
         wywozka) REPLY='[📦 CODZIENNA ROBOTA] Wyślij urobek na wolkę — git push' ;;
         rakowiec) REPLY='[📦 CODZIENNA ROBOTA] Odbierz paczkę bez merge — git pull --ff-only' ;;
         ucho) REPLY='[📦 CODZIENNA ROBOTA] Posłuchaj co na serwerze — git fetch' ;;
+        ksywa) REPLY='[🪪 KARTOTEKA] Ustal ksywę autora — git config user.name' ;;
+        meta) REPLY='[🪪 KARTOTEKA] Ustal metę autora — git config user.email' ;;
+        meldunek) REPLY='[🪪 KARTOTEKA] Zameldowanie naraz — git config user.name + user.email' ;;
+        kartoteka) REPLY='[🪪 KARTOTEKA] Sprawdź papiery i ich źródła — git config --show-origin' ;;
         celka) REPLY='[🚪 CELE I UKŁADY] Lista cel i nowe cele — git branch' ;;
         przerzutka) REPLY='[🚪 CELE I UKŁADY] Zmień celę — git switch' ;;
         spacer) REPLY='[🚪 CELE I UKŁADY] Przejdź w historię — git checkout' ;;
         blaty) REPLY='[🚪 CELE I UKŁADY] Dogadaj gałęzie — git merge' ;;
         uklady) REPLY='[🚪 CELE I UKŁADY] Sprawdź kontakty z wolką — git remote -v' ;;
+        tabor) REPLY='[🚪 CELE I UKŁADY] Przewieź commity na wskazaną bazę — git rebase' ;;
+        podkopsaj) REPLY='[🚪 CELE I UKŁADY] Przemyć commit(y) z innej celi — git cherry-pick' ;;
         kapus) REPLY='[🕵️ DOCHODZENIE] Kto sypnął tę linijkę? — git blame' ;;
         wizjer) REPLY='[🕵️ DOCHODZENIE] Zajrzyj w wybraną akcję — git show' ;;
         bialko) REPLY='[🕵️ DOCHODZENIE] Prześwietl historię — git log' ;;
@@ -46,6 +48,8 @@ _gryps_meta() {
         kasacja) REPLY='[🚨 RATUNEK] Odwróć wyrok nowym commitem — git revert' ;;
         odkrec) REPLY='[🚨 RATUNEK] Odkręć niezapisane zmiany — git restore --worktree' ;;
         kipisz) REPLY='[🚨 RATUNEK] Twardy reset! Ostrożnie — git reset --hard' ;;
+        odklep) REPLY='[🚨 RATUNEK] Odklep 1–N commitów, zmiany zostają skitrane — git reset --soft HEAD~N' ;;
+        wykipruj) REPLY='[🚨 RATUNEK] Pokaż i usuń nieśledzone (po zgodzie) — git clean -d' ;;
         pomoc) REPLY='[📖 POMOC] Pełen regulamin celi — gryps pomoc' ;;
         kmina) REPLY='[📖 POMOC] Rozkmiń jeden gryps — gryps kmina' ;;
         bajera) REPLY='[📖 POMOC] Nauka pod celą — gryps bajera' ;;
@@ -59,7 +63,7 @@ _gryps_meta() {
     esac
 }
 
-_gryps_words='mury jumaj lipo kwity skitrac odkitraj przyklep ksywa meta meldunek kartoteka wywozka rakowiec ucho celka przerzutka spacer blaty uklady kapus wizjer bialko cynk dziara dziupla wyjmij spis spusc kasacja odkrec kipisz pomoc kmina bajera podpowiedzi wersja kopsnij rakieta stojka zblatuj'
+_gryps_words='mury jumaj lipo kwity skitraj odkitraj przyklep wywozka rakowiec ucho ksywa meta meldunek kartoteka celka przerzutka spacer blaty uklady tabor podkopsaj kapus wizjer bialko cynk dziara dziupla wyjmij spis spusc kasacja odkrec kipisz odklep wykipruj pomoc kmina bajera podpowiedzi wersja kopsnij rakieta stojka zblatuj'
 
 _gryps_candidates() {
     # Komendy są podawane w kolejności grup i NIE są wykonywane.
@@ -109,11 +113,25 @@ _gryps_completions() {
             _gryps_candidates "$cur" ;;
         ksywa|meta|meldunek)
             _gryps_collect_completions < <(compgen -W '--global --local' -- "$cur") ;;
-        kapus|skitrac|odkrec|odkitraj|kwity|spacer)
+        kapus|skitraj|odkrec|odkitraj|kwity|spacer|wykipruj)
             if [[ "$cmd" == kapus && "$prev" == -L ]]; then return 0; fi
             _gryps_collect_completions < <(compgen -f -- "$cur") ;;
         przerzutka|blaty|zblatuj)
             _gryps_collect_completions < <(compgen -W "$(git branch --format='%(refname:short)' 2>/dev/null)" -- "$cur") ;;
+        tabor)
+            if [[ "$cur" == -* ]]; then
+                _gryps_collect_completions < <(compgen -W '--autostash --interactive --continue --abort --skip --onto' -- "$cur")
+            else
+                _gryps_collect_completions < <(compgen -W "$(git for-each-ref --format='%(refname:short)' refs/heads refs/remotes 2>/dev/null)" -- "$cur")
+            fi ;;
+        podkopsaj)
+            if [[ "$cur" == -* ]]; then
+                _gryps_collect_completions < <(compgen -W '--no-commit --mainline --continue --abort --skip -x' -- "$cur")
+            else
+                _gryps_collect_completions < <(compgen -W "$(git branch --format='%(refname:short)' 2>/dev/null) $(git log --all -n 30 --format='%h' 2>/dev/null)" -- "$cur")
+            fi ;;
+        odklep)
+            _gryps_collect_completions < <(compgen -W '1 2 3 --force' -- "$cur") ;;
         celka)
             if [[ "${COMP_WORDS[cmd_index+1]:-}" == -d || "${COMP_WORDS[cmd_index+1]:-}" == -D ]]; then
                 _gryps_collect_completions < <(compgen -W "$(git branch --format='%(refname:short)' 2>/dev/null)" -- "$cur")

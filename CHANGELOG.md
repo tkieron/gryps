@@ -1,3 +1,27 @@
+## [1.4.1] — Ratunek bez kipiszu (2026-10-19)
+
+### Zmiana niekompatybilna
+- **`skitrac` → `skitraj`** (`git add`), bez aliasu zgodności. `gryps skitrac` (także `kmina skitrac` i `skitrac -h`) kończy się kodem 1, niczego nie dodaje do stagingu i podpowiada `gryps skitraj`. Migracja skryptów: zamień `gryps skitrac` na `gryps skitraj` — argumenty, domyślne `git add -A` i kody wyjścia są identyczne. Stara nazwa zniknęła z TAB, pomocy, man i README.
+
+### Nowe grypsy
+- `odklep [N] [-f]` — `git reset --soft HEAD~N` (domyślnie 1). Zamknięta lista argumentów (`--hard` nie dociera do Gita); odmowa przy pierwszym commicie, merge w zakresie, operacji w toku i commitach obecnych na remote (wg `refs/remotes`, bez fetch). `-f` świadomie pozwala, bez push. W TTY lista odklepanych commitów i podpowiedzi `kwity --staged`, `przyklep -C ORIG_HEAD`.
+- `wykipruj [-n] [-f] [-x|-X] [[--] ścieżki]` — `git clean -d` w całym repo (`:(top)`) albo we wskazanych ścieżkach. Bez `-f` podgląd na stdout, zgoda w terminalu i ponowne porównanie listy przed usunięciem; bez terminala odmowa. Nigdy `-ff` (zagnieżdżone repozytoria zostają); inne opcje `git clean` odrzucane.
+- `tabor <baza> [opcje]` — `git rebase`. Baza wymagana, brudne drzewo tracked tylko z `--autostash`, `-i` tylko z terminalem, ostrzeżenie o `--force-with-lease` dla wywiezionych commitów. Rozróżnia sukces, brak pracy, konflikt (lista plików) i zatrzymanie; `--continue/--abort/--skip` przechodzą do Gita. GRYPS nie przechwytuje `-f` (`--force-rebase`).
+- `podkopsaj <commit|zakres>… [opcje]` — `git cherry-pick` bez domyślnego `-x`. Merge commit bez `-m` zatrzymywany przed Gitem; osobne komunikaty dla `--no-commit`, pustego przemytu (`--skip`) i konfliktu.
+
+### Zmiany w istniejących komendach
+- `kipisz`: po udanym resecie w TTY podpowiada `gryps wykipruj`, gdy zostały nowe pliki (bez `git clean`).
+- `kmina kasacja` wskazuje `odklep` dla commitów niewywiezionych.
+- Komunikat `wywozka` o luźnych zmianach podaje nową nazwę `skitraj`.
+- Literówki `odklepp/odklp/odklap`, `wykipuj/wykiperuj/wykipr`, `tabur/tbor`, `podkopsj/podkopsa`; normalizator nazw zachowuje polskie litery (np. `odklęp` → podpowiedź `odklep`).
+- `podpowiedzi` generowane z wbudowanego katalogu (44 pozycje); `wywozka`, `rakowiec`, `ucho` wróciły do grupy CODZIENNA ROBOTA.
+
+### TAB, dokumentacja, testy
+- Katalog, Bash, ble.sh i Zsh: `skitraj` i cztery nowe grypsy, podpowiedzi argumentów (gałęzie dla `tabor`, gałęzie i commity dla `podkopsaj`, pliki dla `wykipruj`).
+- README przebudowane: pełny słownik komend na górze, potem historia zmian, instalacja, Smart TAB i bezpieczeństwo; poprawione linki `tkieron/gryps` i nazwy paczek.
+- `man gryps` uporządkowany tematycznie, z nowymi komendami.
+- Nowy `tests/test-v141.sh` (T51–T110), specyfikacja `docs/GRYPS_v1.4.1_SDD.md`.
+
 ## [1.4.0] — Kartoteka grypsującego (2026-10-19)
 
 - Nowe `ksywa`, `meta`, `meldunek`, `kartoteka`: lokalna tożsamość domyślnie, `--global` wyłącznie na żądanie.

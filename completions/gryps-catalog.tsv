@@ -3,21 +3,23 @@ robota|mury|Postaw nową celę|git init
 robota|jumaj|Zwiń repo z wolki|git clone
 robota|lipo|Co słychać pod celą?|git status -sb
 robota|kwity|Wyciągnij dowody zmian|git diff + git diff --cached
-robota|skitrac|Schowaj fanty do indeksu|git add [-A]
+robota|skitraj|Schowaj fanty do indeksu|git add [-A]
 robota|odkitraj|Wyjmij z indeksu, nie z dysku|git restore --staged
 robota|przyklep|Podpisz się pod robotą|git commit
+robota|wywozka|Wyślij urobek na wolkę|git push
+robota|rakowiec|Odbierz paczkę bez merge|git pull --ff-only
+robota|ucho|Posłuchaj co na serwerze|git fetch
 kartoteka|ksywa|Ustal ksywę autora|git config user.name
 kartoteka|meta|Ustal metę autora|git config user.email
 kartoteka|meldunek|Zameldowanie naraz|git config user.name + user.email
 kartoteka|kartoteka|Sprawdź papiery i ich źródła|git config --show-origin
-robota|wywozka|Wyślij urobek na wolkę|git push
-robota|rakowiec|Odbierz paczkę bez merge|git pull --ff-only
-robota|ucho|Posłuchaj co na serwerze|git fetch
 cele|celka|Lista cel i nowe cele|git branch
 cele|przerzutka|Zmień celę|git switch
 cele|spacer|Przejdź w historię|git checkout
 cele|blaty|Dogadaj gałęzie|git merge
 cele|uklady|Sprawdź kontakty z wolką|git remote -v
+cele|tabor|Przewieź commity na wskazaną bazę|git rebase
+cele|podkopsaj|Przemyć commit(y) z innej celi|git cherry-pick
 dochodzenie|kapus|Kto sypnął tę linijkę?|git blame
 dochodzenie|wizjer|Zajrzyj w wybraną akcję|git show
 dochodzenie|bialko|Prześwietl historię|git log
@@ -30,6 +32,8 @@ dziupla|spusc|Spuść wybraną dziuplę|git stash drop
 ratunek|kasacja|Odwróć wyrok nowym commitem|git revert
 ratunek|odkrec|Odkręć niezapisane zmiany|git restore --worktree
 ratunek|kipisz|Twardy reset! Ostrożnie|git reset --hard
+ratunek|odklep|Odklep 1–N commitów, zmiany zostają skitrane|git reset --soft HEAD~N
+ratunek|wykipruj|Pokaż i usuń nieśledzone (po zgodzie)|git clean -d
 pomoc|pomoc|Pełen regulamin celi|gryps pomoc
 pomoc|kmina|Rozkmiń jeden gryps|gryps kmina
 pomoc|bajera|Nauka pod celą|gryps bajera

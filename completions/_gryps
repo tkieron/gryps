@@ -1,5 +1,5 @@
 #compdef gryps
-# GRYPS 1.3.3 — każda podpowiedź w osobnym wierszu, stała kolejność grup.
+# GRYPS 1.4.1 — każda podpowiedź w osobnym wierszu, stała kolejność grup.
 # Warto ustawić w ~/.zshrc: zstyle ':completion:*' group-name ''
 # oraz zstyle ':completion:*:descriptions' format '%B%d%b'
 
@@ -10,7 +10,7 @@ gryps_robota=(
     'jumaj:Zwiń repo z wolki — git clone'
     'lipo:Co słychać pod celą? — git status -sb'
     'kwity:Wyciągnij dowody zmian — git diff + git diff --cached'
-    'skitrac:Schowaj fanty do indeksu — git add [-A]'
+    'skitraj:Schowaj fanty do indeksu — git add [-A]'
     'odkitraj:Wyjmij z indeksu, nie z dysku — git restore --staged'
     'przyklep:Podpisz się pod robotą — git commit'
     'wywozka:Wyślij urobek na wolkę — git push'
@@ -29,6 +29,8 @@ gryps_cele=(
     'spacer:Przejdź w historię — git checkout'
     'blaty:Dogadaj gałęzie — git merge'
     'uklady:Sprawdź kontakty z wolką — git remote -v'
+    'tabor:Przewieź commity na wskazaną bazę — git rebase'
+    'podkopsaj:Przemyć commit(y) z innej celi — git cherry-pick'
 )
 gryps_dochodzenie=(
     'kapus:Kto sypnął tę linijkę? — git blame'
@@ -47,6 +49,8 @@ gryps_ratunek=(
     'kasacja:Odwróć wyrok nowym commitem — git revert'
     'odkrec:Odkręć niezapisane zmiany — git restore --worktree'
     'kipisz:Twardy reset! Ostrożnie — git reset --hard'
+    'odklep:Odklep 1–N commitów, zmiany zostają skitrane — git reset --soft HEAD~N'
+    'wykipruj:Pokaż i usuń nieśledzone (po zgodzie) — git clean -d'
 )
 gryps_pomoc=(
     'pomoc:Pełen regulamin celi — gryps pomoc'
@@ -107,12 +111,22 @@ case "${words[gryps_cmd_index]}" in
             '--local:Zapis tylko dla tego repozytorium'
         )
         _describe -t gryps-identity-scope '🪪 Zasięg konfiguracji' gryps_identity_scope ;;
-    kapus|skitrac|odkrec|odkitraj|kwity|spacer|jumaj)
+    kapus|skitraj|odkrec|odkitraj|kwity|spacer|jumaj|wykipruj)
         # Prawdziwe pliki, także po `--` i po opcjach takich jak `-L`.
         _files ;;
     przerzutka|blaty|zblatuj)
         gryps_branches=("${(@f)$(command git branch --format='%(refname:short)' 2>/dev/null)}")
         (( ${#gryps_branches} )) && _describe -t gryps-git-branches '🚪 Gałęzie — git branch' gryps_branches ;;
+    tabor)
+        gryps_branches=("${(@f)$(command git for-each-ref --format='%(refname:short)' refs/heads refs/remotes 2>/dev/null)}")
+        (( ${#gryps_branches} )) && _describe -t gryps-git-branches '🚌 Baza — git rebase' gryps_branches ;;
+    podkopsaj)
+        gryps_branches=("${(@f)$(command git branch --format='%(refname:short)' 2>/dev/null)}")
+        gryps_commits=("${(@f)$(command git log --all -n 30 --format='%h' 2>/dev/null)}")
+        (( ${#gryps_branches} )) && _describe -t gryps-git-branches '🚪 Gałęzie — git branch' gryps_branches
+        (( ${#gryps_commits} )) && _describe -t gryps-commits '📜 Commity — git log' gryps_commits ;;
+    odklep)
+        _message 'liczba commitów do odklepania (domyślnie 1) albo -f' ;;
     celka)
         if [[ "${words[gryps_cmd_index+1]:-}" == -d || "${words[gryps_cmd_index+1]:-}" == -D ]]; then
             gryps_branches=("${(@f)$(command git branch --format='%(refname:short)' 2>/dev/null)}")

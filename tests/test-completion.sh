@@ -47,7 +47,10 @@ assert_reply 'kapus --cicho -- ts<TAB>' 'tsPrasa.txt' gryps --cicho kapus -- ts
 assert_reply 'odkitraj -- ts<TAB>' 'tsPrasa.txt' gryps odkitraj -- ts
 assert_reply 'odkrec -- ts<TAB>' 'tsPrasa.txt' gryps odkrec -- ts
 assert_reply 'kwity -- ts<TAB>' 'tsPrasa.txt' gryps kwity -- ts
-assert_reply 'skitrac -- ts<TAB>' 'tsPrasa.txt' gryps skitrac -- ts
+assert_reply 'skitraj -- ts<TAB>' 'tsPrasa.txt' gryps skitraj -- ts
+assert_reply 'skitraj -- src/ts<TAB>' 'src/tsTest.java' gryps skitraj -- src/ts
+assert_reply 'wykipruj -- ts<TAB>' 'tsPrasa.txt' gryps wykipruj -- ts
+assert_reply 'podpowiedź skitraj' 'skitraj' gryps ski
 assert_reply 'podpowiedź nazwy grypsu' 'kapus' gryps kap
 assert_reply 'podpowiedź po --cicho' 'kapus' gryps --cicho kap
 assert_reply 'kmina kap<TAB>' 'kapus' gryps kmina kap

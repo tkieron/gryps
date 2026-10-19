@@ -41,7 +41,7 @@ show_help() {
     echo -e "  ${CYAN}mury${NC}              Stawiasz mury nowej celi – zakładasz repo ${BLUE}(git init)${NC}"
     echo -e "  ${CYAN}jumaj${NC} <url>       Zawija (klonuje) całe repo z wolki na Twój dysk ${BLUE}(git clone)${NC}"
     echo -e "  ${CYAN}lipo${NC}              Patrzysz przez lipo, co się dzieje w celi ${BLUE}(git status)${NC}"
-    echo -e "  ${CYAN}skitrac${NC} [plik]    Kitrasz fanty na bezpieczną miejscówkę przed wysyłką ${BLUE}(git add)${NC}"
+    echo -e "  ${CYAN}skitraj${NC} [plik]    Kitrasz fanty na bezpieczną miejscówkę przed wysyłką ${BLUE}(git add)${NC}"
     echo -e "  ${CYAN}przyklep${NC} <gryps>  Przyklepuje zmiany w papierach ${BLUE}(git commit -m)${NC}"
     echo -e "  ${CYAN}ksywa${NC} [imię]      Ksywa sprawcy, lokalnie albo --global ${BLUE}(git config user.name)${NC}"
     echo -e "  ${CYAN}meta${NC} [email]      Adres, pod którym znajdą sprawcę ${BLUE}(git config user.email)${NC}"
@@ -57,7 +57,9 @@ show_help() {
     echo -e "  ${CYAN}spacer${NC} <cel/hash> Klasyczne przejście na inną celę lub w przeszłość ${BLUE}(git checkout)${NC}"
     echo -e "  ${CYAN}blaty${NC} <celka>     Układ i łączenie urobku z innej celi z obecną ${BLUE}(git merge)${NC}"
     echo -e "  ${CYAN}wizjer${NC} [hash]     Zaglądasz przez wizjer w szczegóły konkretnej akcji ${BLUE}(git show)${NC}"
-    echo -e "  ${CYAN}bialko${NC}            Przeglądasz kwity sprawy (czytelny graf historii) ${BLUE}(git log)${NC}\n"
+    echo -e "  ${CYAN}bialko${NC}            Przeglądasz kwity sprawy (czytelny graf historii) ${BLUE}(git log)${NC}"
+    echo -e "  ${CYAN}tabor${NC} <baza>      Przewozisz commity celki na wskazaną bazę ${BLUE}(git rebase)${NC}"
+    echo -e "  ${CYAN}podkopsaj${NC} <hash>  Przemycasz commit(y) z innej celi na obecną ${BLUE}(git cherry-pick)${NC}\n"
 
     echo -e "${BOLD}DZIUPLA (Chowanie roboty przed kipiszem - Stash):${NC}"
     echo -e "  ${CYAN}dziupla${NC}           Chowa śledzone ORAZ nowe pliki (bez ignored) ${BLUE}(git stash push -u)${NC}"
@@ -67,7 +69,9 @@ show_help() {
 
     echo -e "${BOLD}AWARYJNE I EDUKACYJNE:${NC}"
     echo -e "  ${CYAN}kipisz${NC}            Rewizja śledzonych zmian; nowe pliki zostają ${BLUE}(git reset --hard)${NC}"
-    echo -e "\n${BOLD}NOWE GRYPSY 1.3 (Akta, ślady i poprawki):${NC}"
+    echo -e "  ${CYAN}odklep${NC} [N]        Cofa 1–N niewywiezionych commitów, zmiany zostają skitrane ${BLUE}(git reset --soft)${NC}"
+    echo -e "  ${CYAN}wykipruj${NC}          Pokazuje i po zgodzie usuwa nieśledzone pliki ${BLUE}(git clean -d)${NC}"
+    echo -e "\n${BOLD}AKTA, ŚLADY I POPRAWKI:${NC}"
     echo -e "  ${CYAN}kwity${NC}             Dwa zestawy dowodów: diff unstaged + staged ${BLUE}(git diff)${NC}"
     echo -e "  ${CYAN}odkitraj${NC}          Zdejmij ze stagingu, nie niszcząc plików ${BLUE}(git restore --staged)${NC}"
     echo -e "  ${CYAN}kapus${NC} <plik>      Kto sypnął tę linię? ${BLUE}(git blame)${NC}"
@@ -90,60 +94,79 @@ show_help() {
     echo -e "Pełne akta: ${CYAN}man gryps${NC}  •  Wszystko, czego Gryps nie tłumaczy, robisz zwykłym ${CYAN}git${NC}.\n"
 }
 
+# Katalog grypsów: jedno źródło prawdy dla podpowiedzi. Musi być identyczny
+# z completions/gryps-catalog.tsv (pilnuje tego tests/test-v141.sh).
+# Grupa | Gryps | Znaczenie | Odpowiednik Git (ostatnie pole)
+gryps_catalog() {
+    cat <<'CATALOG'
+robota|mury|Postaw nową celę|git init
+robota|jumaj|Zwiń repo z wolki|git clone
+robota|lipo|Co słychać pod celą?|git status -sb
+robota|kwity|Wyciągnij dowody zmian|git diff + git diff --cached
+robota|skitraj|Schowaj fanty do indeksu|git add [-A]
+robota|odkitraj|Wyjmij z indeksu, nie z dysku|git restore --staged
+robota|przyklep|Podpisz się pod robotą|git commit
+robota|wywozka|Wyślij urobek na wolkę|git push
+robota|rakowiec|Odbierz paczkę bez merge|git pull --ff-only
+robota|ucho|Posłuchaj co na serwerze|git fetch
+kartoteka|ksywa|Ustal ksywę autora|git config user.name
+kartoteka|meta|Ustal metę autora|git config user.email
+kartoteka|meldunek|Zameldowanie naraz|git config user.name + user.email
+kartoteka|kartoteka|Sprawdź papiery i ich źródła|git config --show-origin
+cele|celka|Lista cel i nowe cele|git branch
+cele|przerzutka|Zmień celę|git switch
+cele|spacer|Przejdź w historię|git checkout
+cele|blaty|Dogadaj gałęzie|git merge
+cele|uklady|Sprawdź kontakty z wolką|git remote -v
+cele|tabor|Przewieź commity na wskazaną bazę|git rebase
+cele|podkopsaj|Przemyć commit(y) z innej celi|git cherry-pick
+dochodzenie|kapus|Kto sypnął tę linijkę?|git blame
+dochodzenie|wizjer|Zajrzyj w wybraną akcję|git show
+dochodzenie|bialko|Prześwietl historię|git log
+dochodzenie|cynk|Tropy po ruchach HEAD|git reflog
+dochodzenie|dziara|Wydziaraj wersję|git tag
+dziupla|dziupla|Schowaj także nowe fanty|git stash push -u
+dziupla|wyjmij|Wyjmij fanty z dziupli|git stash pop
+dziupla|spis|Co leży w dziupli?|git stash list
+dziupla|spusc|Spuść wybraną dziuplę|git stash drop
+ratunek|kasacja|Odwróć wyrok nowym commitem|git revert
+ratunek|odkrec|Odkręć niezapisane zmiany|git restore --worktree
+ratunek|kipisz|Twardy reset! Ostrożnie|git reset --hard
+ratunek|odklep|Odklep 1–N commitów, zmiany zostają skitrane|git reset --soft HEAD~N
+ratunek|wykipruj|Pokaż i usuń nieśledzone (po zgodzie)|git clean -d
+pomoc|pomoc|Pełen regulamin celi|gryps pomoc
+pomoc|kmina|Rozkmiń jeden gryps|gryps kmina
+pomoc|bajera|Nauka pod celą|gryps bajera
+pomoc|podpowiedzi|Spis grypsów i ich znaczeń|gryps podpowiedzi
+pomoc|wersja|Numer aktualnej odsiadki|gryps wersja
+aliasy|kopsnij|Alias wywózki|git push
+aliasy|rakieta|Alias rakowca|git pull --ff-only
+aliasy|stojka|Alias ucha|git fetch
+aliasy|zblatuj|Alias blatów|git merge
+CATALOG
+}
+
 show_podpowiedzi() {
     # Spis pogrupowany działa wszędzie, także w klasycznym Bashu bez ble.sh.
     # Ostatnia kolumna to odpowiednik Git.
-    printf "\n%s\n" '📦 CODZIENNA ROBOTA'
-    printf "  %-13s %-40s %s\n" 'mury' 'Postaw nową celę' 'git init'
-    printf "  %-13s %-40s %s\n" 'jumaj' 'Zwiń repo z wolki' 'git clone'
-    printf "  %-13s %-40s %s\n" 'lipo' 'Co słychać pod celą?' 'git status -sb'
-    printf "  %-13s %-40s %s\n" 'kwity' 'Wyciągnij dowody zmian' 'git diff + git diff --cached'
-    printf "  %-13s %-40s %s\n" 'skitrac' 'Schowaj fanty do indeksu' 'git add [-A]'
-    printf "  %-13s %-40s %s\n" 'odkitraj' 'Wyjmij z indeksu, nie z dysku' 'git restore --staged'
-    printf "  %-13s %-40s %s\n" 'przyklep' 'Podpisz się pod robotą' 'git commit'
-    printf "\n%s\n" '🪪 KARTOTEKA GRYPSUJĄCEGO'
-    printf "  %-13s %-40s %s\n" 'ksywa' 'Jak wołają na ciebie pod celą' 'git config user.name'
-    printf "  %-13s %-40s %s\n" 'meta' 'Adres do doręczania grypsów' 'git config user.email'
-    printf "  %-13s %-40s %s\n" 'meldunek' 'Ustaw ksywę i metę jednym ruchem' 'git config user.name + user.email'
-    printf "  %-13s %-40s %s\n" 'kartoteka' 'Sprawdź podpis i skąd pochodzi' 'git config --show-origin' 
-    printf "  %-13s %-40s %s\n" 'wywozka' 'Wyślij urobek na wolkę' 'git push'
-    printf "  %-13s %-40s %s\n" 'rakowiec' 'Odbierz paczkę bez merge' 'git pull --ff-only'
-    printf "  %-13s %-40s %s\n" 'ucho' 'Posłuchaj co na serwerze' 'git fetch'
-    printf "\n%s\n" '🚪 CELE I UKŁADY'
-    printf "  %-13s %-40s %s\n" 'celka' 'Lista cel i nowe cele' 'git branch'
-    printf "  %-13s %-40s %s\n" 'przerzutka' 'Zmień celę' 'git switch'
-    printf "  %-13s %-40s %s\n" 'spacer' 'Przejdź w historię' 'git checkout'
-    printf "  %-13s %-40s %s\n" 'blaty' 'Dogadaj gałęzie' 'git merge'
-    printf "  %-13s %-40s %s\n" 'uklady' 'Sprawdź kontakty z wolką' 'git remote -v'
-    printf "\n%s\n" '🕵️ DOCHODZENIE'
-    printf "  %-13s %-40s %s\n" 'kapus' 'Kto sypnął tę linijkę?' 'git blame'
-    printf "  %-13s %-40s %s\n" 'wizjer' 'Zajrzyj w wybraną akcję' 'git show'
-    printf "  %-13s %-40s %s\n" 'bialko' 'Prześwietl historię' 'git log'
-    printf "  %-13s %-40s %s\n" 'cynk' 'Tropy po ruchach HEAD' 'git reflog'
-    printf "  %-13s %-40s %s\n" 'dziara' 'Wydziaraj wersję' 'git tag'
-    printf "\n%s\n" '🕳️ DZIUPLA'
-    printf "  %-13s %-40s %s\n" 'dziupla' 'Schowaj także nowe fanty' 'git stash push -u'
-    printf "  %-13s %-40s %s\n" 'wyjmij' 'Wyjmij fanty z dziupli' 'git stash pop'
-    printf "  %-13s %-40s %s\n" 'spis' 'Co leży w dziupli?' 'git stash list'
-    printf "  %-13s %-40s %s\n" 'spusc' 'Spuść wybraną dziuplę' 'git stash drop'
-    printf "\n%s\n" '🚨 RATUNEK'
-    printf "  %-13s %-40s %s\n" 'kasacja' 'Odwróć wyrok nowym commitem' 'git revert'
-    printf "  %-13s %-40s %s\n" 'odkrec' 'Odkręć niezapisane zmiany' 'git restore --worktree'
-    printf "  %-13s %-40s %s\n" 'kipisz' 'Twardy reset! Ostrożnie' 'git reset --hard'
-    printf "\n%s\n" '📖 POMOC'
-    printf "  %-13s %-40s %s\n" 'pomoc' 'Pełen regulamin celi' 'gryps pomoc'
-    printf "  %-13s %-40s %s\n" 'kmina' 'Rozkmiń jeden gryps' 'gryps kmina'
-    printf "  %-13s %-40s %s\n" 'bajera' 'Nauka pod celą' 'gryps bajera'
-    printf "  %-13s %-40s %s\n" 'podpowiedzi' 'Spis grypsów i ich znaczeń' 'gryps podpowiedzi'
-    printf "  %-13s %-40s %s\n" 'wersja' 'Numer aktualnej odsiadki' 'gryps wersja'
-    printf "\n%s\n" '🔁 ZAMIENNIKI'
-    printf "  %-13s %-40s %s\n" 'kopsnij' 'Alias wywózki' 'git push'
-    printf "  %-13s %-40s %s\n" 'rakieta' 'Alias rakowca' 'git pull --ff-only'
-    printf "  %-13s %-40s %s\n" 'stojka' 'Alias ucha' 'git fetch'
-    printf "  %-13s %-40s %s\n" 'zblatuj' 'Alias blatów' 'git merge'
-    printf '
-TAB: Bash = nazwy | Bash + ble.sh = opisy | Zsh = grupy i opisy.
-'
+    local group name desc git_cmd last=''
+    while IFS='|' read -r group name desc git_cmd; do
+        if [ "$group" != "$last" ]; then
+            case "$group" in
+                robota) printf "\n%s\n" '📦 CODZIENNA ROBOTA' ;;
+                kartoteka) printf "\n%s\n" '🪪 KARTOTEKA GRYPSUJĄCEGO' ;;
+                cele) printf "\n%s\n" '🚪 CELE I UKŁADY' ;;
+                dochodzenie) printf "\n%s\n" '🕵️ DOCHODZENIE' ;;
+                dziupla) printf "\n%s\n" '🕳️ DZIUPLA' ;;
+                ratunek) printf "\n%s\n" '🚨 RATUNEK' ;;
+                pomoc) printf "\n%s\n" '📖 POMOC' ;;
+                aliasy) printf "\n%s\n" '🔁 ZAMIENNIKI' ;;
+            esac
+            last="$group"
+        fi
+        printf "  %-13s %-40s %s\n" "$name" "$desc" "$git_cmd"
+    done < <(gryps_catalog)
+    printf '\nTAB: Bash = nazwy | Bash + ble.sh = opisy | Zsh = grupy i opisy.\n'
 }
 
 show_bajera() {
@@ -158,7 +181,7 @@ show_bajera() {
     echo -e "${YELLOW}4. Piszesz kod. Chcesz sprawdzić, jakie pliki ruszałeś? Patrzysz przez lipo:${NC}"
     echo -e "   $ ${CYAN}gryps lipo${NC}\n"
     echo -e "${YELLOW}5. Robota skończona. Kitrasz wszystkie zmienione fanty:${NC}"
-    echo -e "   $ ${CYAN}gryps skitrac${NC}   ${BLUE}(bez argumentów kitra wszystko w całym repo!)${NC}\n"
+    echo -e "   $ ${CYAN}gryps skitraj${NC}   ${BLUE}(bez argumentów kitra wszystko w całym repo!)${NC}\n"
     echo -e "${YELLOW}6. Przyklepujesz zmiany w papierach i piszesz krótki gryps co zrobiłeś:${NC}"
     echo -e "   $ ${CYAN}gryps przyklep \"Naprawiony zamek w drzwiach\"${NC}\n"
     echo -e "${YELLOW}7. Wysyłasz wywózkę ze swoim urobkiem na zdalny serwer:${NC}"
@@ -201,10 +224,10 @@ show_cmd_help() {
             echo -e "${BOLD}KOMENDA:${NC} ${CYAN}gryps lipo${NC} ${BLUE}(git status)${NC}"
             echo -e "Rozglądasz się po celi. Pokazuje które pliki są zmienione, które skitrane (gotowe do commita), a które zupełnie nowe."
             ;;
-        skitrac)
-            echo -e "${BOLD}KOMENDA:${NC} ${CYAN}gryps skitrac [plik]${NC} ${BLUE}(git add)${NC}"
+        skitraj)
+            echo -e "${BOLD}KOMENDA:${NC} ${CYAN}gryps skitraj [plik]${NC} ${BLUE}(git add)${NC}"
             echo -e "Chowa zmodyfikowane pliki do poczekalni (staging area), żeby przygotować je do przyklepania."
-            echo -e "Ułatwienie: Jeśli nie podasz nazwy pliku, ${CYAN}gryps skitrac${NC} skitra wszystko w całym repo, łącznie z usuniętymi plikami (${BLUE}git add -A${NC})."
+            echo -e "Ułatwienie: Jeśli nie podasz nazwy pliku, ${CYAN}gryps skitraj${NC} skitra wszystko w całym repo, łącznie z usuniętymi plikami (${BLUE}git add -A${NC})."
             ;;
         ksywa)
             printf 'gryps ksywa [--global] ["Ksywa"] — git config user.name\n'
@@ -295,6 +318,42 @@ show_cmd_help() {
             ;;
         kasacja)
             printf 'gryps kasacja <hash> [--no-commit] = git revert --no-edit (bez przepisywania historii)\n'
+            printf 'Commit jeszcze nie wywieziony? Cofniesz go z zachowaniem zmian w stagingu: gryps odklep\n'
+            ;;
+        odklep)
+            printf 'gryps odklep [N] [-f] = git reset --soft HEAD~N (domyślnie N=1)\n'
+            printf 'Cofa ostatnie N commitów. Zmiany wracają do stagingu, pliki na dysku zostają nietknięte.\n'
+            printf 'Nie przyjmuje innych opcji: --hard i --mixed nie przejdą (do tego jest gryps kipisz).\n'
+            printf 'Odmawia, gdy w zakresie jest merge, gdy trwa merge/rebase/cherry-pick albo gdy commit jest\n'
+            printf 'już na remote. Remote sprawdzany jest według lokalnych refs/remotes, czyli stanu z ostatniego\n'
+            printf 'gryps ucho (bez automatycznego fetch). -f świadomie odklepuje wywiezione commity; potem\n'
+            printf 'potrzebna jest gryps wywozka --force-with-lease (GRYPS sam nie wypycha).\n'
+            printf '\nPRZYKŁADY:\n  gryps odklep\n  gryps odklep 3\n  gryps przyklep -C ORIG_HEAD    # ten sam opis i autor\n'
+            ;;
+        wykipruj)
+            printf 'gryps wykipruj [-n] [-f] [-x|-X] [[--] ścieżki...] = git clean -d\n'
+            printf 'Usuwa NIEŚLEDZONE pliki i katalogi w całym repo (albo we wskazanych ścieżkach).\n'
+            printf 'UWAGA: usuniętych plików nie odzyska ani Git, ani gryps cynk.\n'
+            printf 'Bez -f pokazuje listę i pyta o zgodę; bez terminala odmawia. -n tylko pokazuje.\n'
+            printf 'Pliki ignorowane zostają; -x usuwa także ignorowane (np. .env!), -X tylko ignorowane.\n'
+            printf 'Zagnieżdżone repozytoria (katalogi z własnym .git) zostają. Pełna kontrola: git clean.\n'
+            printf '\nPRZYKŁADY:\n  gryps wykipruj -n\n  gryps wykipruj -- build/ tmp/\n  gryps kipisz && gryps wykipruj\n'
+            ;;
+        tabor)
+            printf 'gryps tabor <baza> [opcje git rebase] = git rebase\n'
+            printf 'Przewozi commity bieżącej celki na wskazaną bazę. Baza jest wymagana.\n'
+            printf 'Przy luźnych zmianach tracked odmawia, chyba że dodasz --autostash. Nie robi wywózki:\n'
+            printf 'po przewiezieniu commitów obecnych na remote potrzebna jest gryps wywozka --force-with-lease.\n'
+            printf 'Konflikt: gryps lipo, popraw pliki, gryps skitraj, gryps tabor --continue\n'
+            printf '(albo --skip, albo --abort, który wraca do stanu sprzed taboru).\n'
+            printf '\nPRZYKŁADY:\n  gryps ucho && gryps tabor origin/main\n  gryps tabor main --autostash\n  gryps tabor -i main\n'
+            ;;
+        podkopsaj)
+            printf 'gryps podkopsaj <commit|zakres>... [opcje git cherry-pick] = git cherry-pick\n'
+            printf 'Przenosi wskazane commity na bieżącą celkę jako nowe commity (z -n tylko do stagingu).\n'
+            printf 'Merge commit wymaga wskazania rodzica: gryps podkopsaj -m 1 <hash>.\n'
+            printf 'Konflikt: gryps skitraj, potem gryps podkopsaj --continue (albo --skip / --abort).\n'
+            printf '\nPRZYKŁADY:\n  gryps podkopsaj a1b2c3d\n  gryps podkopsaj hotfix~2..hotfix\n  gryps podkopsaj -x a1b2c3d\n'
             ;;
         uklady)
             printf 'gryps uklady [add|get-url|remove...] = git remote (-v bez arg.)\n'
@@ -307,8 +366,12 @@ show_cmd_help() {
             echo -e "${RED}UWAGA:${NC} Cofnie śledzone pliki do HEAD, ale NIE usunie nowych (nieśledzonych) plików!"
             echo -e "Przed kipiszem pyta o potwierdzenie. Flaga ${CYAN}-f${NC} pomija pytanie (np. w skryptach)."
             ;;
+        skitrac)
+            gryps_retired_skitrac
+            return 1
+            ;;
         *)
-            echo -e "${RED}🚨 Nie ma takiej komendy w słowniku jak '$1'. Wpisz 'gryps pomoc'.${NC}"
+            echo -e "${RED}🚨 Nie ma takiej komendy w słowniku jak '$(clean_cmd "$1")'. Wpisz 'gryps pomoc'.${NC}"
             ;;
     esac
 }
@@ -330,8 +393,11 @@ if [ "$GRYPS_TTY" -eq 1 ] && [ -z "${NO_COLOR:-}" ]; then
     case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in *UTF-8*|*utf8*|*utf-8*) GRYPS_EMOJI=1;; esac
 fi
 # Dla błędów podajemy treść nawet w pipe. Żarty tylko w interakcji.
+# Opcjonalne kolejne argumenty to dane wstawiane w miejsca %s frazy
+# (oczyszczone z sekwencji sterujących). Istniejące frazy nie mają %s.
 gryps_tell() {
-    local variant="$1" key="$2" prefix='' phrase=''
+    local variant="$1" key="$2" prefix='' phrase='' arg
+    shift 2
     case "$variant:$key" in
       intro:lipo) phrase='Zerkam przez lipo. Co leży na blacie?'; prefix='👁️';;
       intro:kwity) phrase='Kwity na stół. Sprawdzimy, co kombinowałeś.'; prefix='📜';;
@@ -345,7 +411,7 @@ gryps_tell() {
       intro:wizjer) phrase='Przez wizjer wszystko widać. Akta sprawy:'; prefix='🔎';;
       ok:mury) phrase='Mury stoją. Teraz można kombinować.'; prefix='🧱';;
       ok:jumaj) phrase='Fanty przywiezione z wolki. Repo siedzi z nami.'; prefix='🥷';;
-      ok:skitrac) phrase='Skitrane. Fanty czekają na przyklepanie.'; prefix='📦';;
+      ok:skitraj) phrase='Skitrane. Fanty czekają na przyklepanie.'; prefix='📦';;
       ok:ksywa) phrase='Ksywa zaklepana. Teraz wiadomo, kto tu grypsuje.'; prefix='🪪';;
       ok:meta) phrase='Meta namierzona. Wiadomo, gdzie słać grypsy.'; prefix='📮';;
       ok:meldunek) phrase='Meldunek przyjęty. Papiery czyste, można przyklepywać.'; prefix='🫡';;
@@ -353,7 +419,7 @@ gryps_tell() {
       ok:wywozka) phrase='Wywózka zakończona. Na bramie nie zatrzymali.'; prefix='🚐';;
       empty:wywozka) phrase='Na wolce już wszystko mają. Nie ma czego wywozić.'; prefix='🚐';;
       pending:wywozka-staged) phrase='Ej, ziomuś! Fanty już skitrane, ale papierów nie przyklepałeś. Najpierw: gryps przyklep "opis roboty", potem: gryps wywozka. Z pustego i Salomon nie naleje.'; prefix='📦';;
-      pending:wywozka-unstaged) phrase='Mordo, robota leży luzem. Najpierw gryps skitrac, potem gryps przyklep, dopiero wywozka.'; prefix='🧱';;
+      pending:wywozka-unstaged) phrase='Mordo, robota leży luzem. Najpierw gryps skitraj, potem gryps przyklep, dopiero wywozka.'; prefix='🧱';;
       pending:wywozka-untracked) phrase='Na blacie leżą nowe fanty. Najpierw je skitraj i przyklep, inaczej nie pojadą.'; prefix='📂';;
       warning:wywozka-staged) phrase='Uwaga, ziomuś: wysłane są tylko wcześniejsze przyklepane papiery. To, co nadal leży w stagingu, nie pojechało. Najpierw przyklep.'; prefix='⚠️';;
       ok:rakowiec) phrase='Rakieta odebrana. Bez szemranych blatów.'; prefix='📨';;
@@ -379,16 +445,62 @@ gryps_tell() {
       empty:kwity) phrase='Kwity czyste. Nie ma żadnych dowodów.'; prefix='🧼';;
       empty:spis) phrase='Dziuple puste. Nikt nic nie skitrał.'; prefix='📭';;
       empty:dziara) phrase='Na skórze ani jednej dziary.'; prefix='🧼';;
+      ok:odklep) phrase='Odklepane. Papiery wróciły na blat, wszystko czeka w stagingu.'; prefix='📄';;
+      info:odklep-zmieszane) phrase='W stagingu leżały już inne fanty. Teraz leżą razem.'; prefix='ℹ️';;
+      warning:odklep-wywiezione) phrase='Ten papier już wyjechał na wolkę. Przepisujesz historię, którą inni mogą mieć.'; prefix='⚠️';;
+      error:odklep-wywiezione) phrase='Tego nie odklepię, młody, to już jest na wolce.'; prefix='🚨';;
+      error:odklep-merge) phrase='To był blat dwóch celi. Odklep tego nie rozplącze.'; prefix='🚨';;
+      error:odklep-root) phrase='To pierwszy papier w aktach, nie ma do czego się cofać.'; prefix='🚨';;
+      error:odklep-za-malo) phrase='Tyle papierów w aktach nie ma.'; prefix='🚨';;
+      error:odklep-pusto) phrase='Pusto w aktach. Nie ma czego odklepywać.'; prefix='🚨';;
+      error:w-toku) phrase='Trwa inna robota (%s). Najpierw ją dokończ albo przerwij.'; prefix='🚨';;
+      intro:wykipruj) phrase='Lista do wykiprowania. Te fanty nie mają papierów:'; prefix='🧹';;
+      warning:wykipruj-ignorowane) phrase='Z -x lecą też ignorowane: .env, node_modules, build. Patrz uważnie.'; prefix='⚠️';;
+      empty:wykipruj) phrase='Nie ma czego wykiprować. Na blacie same legalne fanty.'; prefix='🧼';;
+      ok:wykipruj) phrase='Wykiprowane. Blat czysty, papiery zostały.'; prefix='🧹';;
+      error:wykipruj-zmiana) phrase='Lista się zmieniła w trakcie. Nic nie ruszyłem, odpal jeszcze raz.'; prefix='🚨';;
+      info:kipisz-wykipruj) phrase='Nowe pliki zostały na blacie. Wyrzucisz je: gryps wykipruj.'; prefix='ℹ️';;
+      ok:tabor) phrase='Tabor dojechał. Papiery przewiezione na %s: %s.'; prefix='🚌';;
+      ok:tabor-dalej) phrase='Tabor dojechał. Papiery na nowej bazie.'; prefix='🚌';;
+      ok:tabor-abort) phrase='Tabor zawrócony. Celka stoi jak przed wyjazdem.'; prefix='🔙';;
+      info:tabor-postoj) phrase='Tabor na postoju. Popraw, co trzeba, i: gryps tabor --continue.'; prefix='🚏';;
+      empty:tabor) phrase='Tabor stoi. Ta celka już jedzie na świeżej bazie.'; prefix='🚌';;
+      warning:tabor-wywiezione|warning:tabor-wywozka) phrase='Część papierów jest już na wolce. Po taborze: gryps wywozka --force-with-lease.'; prefix='⚠️';;
+      error:tabor-brudno) phrase='Na blacie leżą luźne fanty. Tabor ich nie zabierze.'; prefix='🚨';;
+      error:tabor-konflikt) phrase='Dymy w taborze! Dwie ekipy walczą o te same linijki.'; prefix='🚨';;
+      error:tabor-stoi) phrase='Tabor stoi w połowie drogi.'; prefix='🚨';;
+      error:tabor-baza) phrase='Takiej bazy nie ma w aktach. Dokąd mam wieźć?'; prefix='🚨';;
+      ok:podkopsaj) phrase='Przemycone. Papier z innej celi leży już u nas (nowe commity: %s).'; prefix='🐪';;
+      ok:podkopsaj-dalej) phrase='Przemycone. Papier z innej celi leży już u nas.'; prefix='🐪';;
+      ok:podkopsaj-nocommit) phrase='Przemyt na blacie, jeszcze nieprzyklepany.'; prefix='🐪';;
+      ok:podkopsaj-abort) phrase='Przemyt odwołany. Celka jak przed akcją.'; prefix='🔙';;
+      error:podkopsaj-pusty) phrase='Ten fant już tu jest. Pomiń go: gryps podkopsaj --skip.'; prefix='🚨';;
+      error:podkopsaj-konflikt) phrase='Przemyt utknął na bramce. Konflikt w plikach.'; prefix='🚨';;
+      error:podkopsaj-merge) phrase='To blat dwóch celi. Wskaż rodzica: gryps podkopsaj -m 1 <hash>.'; prefix='🚨';;
       cancel:*) phrase='Odwołane. Cela nietknięta, klawisz wraca z niczym.'; prefix='🛑';;
       error:*) phrase='Przypał na robocie. Szczegóły wysypał już Git.'; prefix='🚨';;
       *) phrase='Robota załatwiona.'; prefix='✅';;
     esac
     if [ "$GRYPS_TTY" -eq 1 ]; then
+        for arg in "$@"; do
+            case "$phrase" in *'%s'*) arg="$(gryps_clean_text "$arg")"; phrase="${phrase%%\%s*}$arg${phrase#*\%s}";; esac
+        done
         if [ "$GRYPS_EMOJI" -eq 1 ]; then printf '%s [GRYPS] %s\n' "$prefix" "$phrase" >&2
         else printf '[GRYPS] %s\n' "$phrase" >&2; fi
     fi
 }
 gryps_error() { printf 'GRYPS: %s\n' "$*" >&2; }
+# Dane z Gita i od użytkownika (hash, temat, ref) bez znaków sterujących.
+gryps_clean_text() { printf '%s' "$1" | LC_ALL=C tr -d '\000-\037\177'; }
+# Błąd GRYPS: w TTY grypsowa kwestia, poza TTY rzeczowy opis; potem zawsze
+# konkretne następne kroki. Argumenty: klucz, opis rzeczowy, [kroki...].
+gryps_fail() {
+    local key="$1" plain="$2" hint
+    shift 2
+    if [ "$GRYPS_TTY" -eq 1 ]; then gryps_tell error "$key"; else gryps_error "$plain"; fi
+    for hint in "$@"; do gryps_error "$hint"; done
+    return 1
+}
 gryps_run() {
     local key="$1" rc
     shift
@@ -630,7 +742,334 @@ potwierdz() {
     [[ "$odp" =~ ^[tTyY]$ ]]
 }
 # Nie pozwalamy na interpretację ANSI, przejść do nowej linii czy wstrzyknięcie terminala.
-clean_cmd() { printf '%s' "$1" | LC_ALL=C tr -cd 'a-zA-Z0-9_. -' | cut -c1-64; }
+# Bajty >= 0x80 zostają, żeby polskie litery nie znikały i nie zmieniały znaczenia
+# wpisanego słowa (np. „odklęp” nie staje się „odklp”).
+clean_cmd() { printf '%s' "$1" | LC_ALL=C tr -cd 'a-zA-Z0-9_. \200-\377-' | cut -c1-64; }
+
+# Operacja Gita w toku (merge, cherry-pick, revert, rebase). Wypisuje nazwę
+# i podpowiedź; ścieżki przez rev-parse --git-path (działa w worktree).
+gryps_op_in_progress() {
+    local path
+    path="$(git rev-parse --git-path MERGE_HEAD)"
+    if [ -e "$path" ]; then GRYPS_OP_HINT='git merge --continue albo git merge --abort'; printf 'merge'; return 0; fi
+    path="$(git rev-parse --git-path CHERRY_PICK_HEAD)"
+    if [ -e "$path" ]; then GRYPS_OP_HINT='gryps podkopsaj --continue albo gryps podkopsaj --abort'; printf 'cherry-pick'; return 0; fi
+    path="$(git rev-parse --git-path REVERT_HEAD)"
+    if [ -e "$path" ]; then GRYPS_OP_HINT='gryps kasacja --continue albo gryps kasacja --abort'; printf 'revert'; return 0; fi
+    if gryps_rebase_in_progress; then GRYPS_OP_HINT='gryps tabor --continue albo gryps tabor --abort'; printf 'rebase'; return 0; fi
+    return 1
+}
+gryps_rebase_in_progress() {
+    [ -d "$(git rev-parse --git-path rebase-merge)" ] || [ -d "$(git rev-parse --git-path rebase-apply)" ]
+}
+gryps_fail_in_progress() {
+    local op
+    op="$(gryps_op_in_progress)" || return 1
+    gryps_op_in_progress >/dev/null
+    if [ "$GRYPS_TTY" -eq 1 ]; then gryps_tell error w-toku "$op"
+    else gryps_error "Trwa inna operacja Git ($op). Najpierw ją dokończ albo przerwij."; fi
+    gryps_error "Dalej: $GRYPS_OP_HINT"
+    return 0
+}
+# Pliki z konfliktem (bez parsowania tekstów Gita), wypisane na stderr.
+gryps_conflict_files() {
+    printf 'Pliki z konfliktem:\n' >&2
+    git diff --name-only --diff-filter=U | sed 's/^/  /' >&2
+}
+
+# odklep [N] [-f]: git reset --soft HEAD~N. Zamknięta lista argumentów,
+# żeby --hard czy --mixed nigdy nie dotarły do Gita.
+gryps_odklep() {
+    local n=1 have_n=0 force=0 arg old_head total unpub pub staged_before=0 rc shown
+    check_repo
+    for arg in "$@"; do
+        case "$arg" in
+            -f|--force) force=1 ;;
+            *)
+                if [ "$have_n" -eq 0 ] && [[ "$arg" =~ ^[1-9][0-9]{0,8}$ ]]; then n="$arg"; have_n=1
+                else
+                    gryps_error "Odklep nie przyjmuje: $(clean_cmd "$arg"). Użycie: gryps odklep [N] [-f], gdzie N to liczba commitów (domyślnie 1)."
+                    gryps_error 'Nic nie zmieniłem. Twardy reset to gryps kipisz, pełna kontrola: git reset.'
+                    return 1
+                fi ;;
+        esac
+    done
+    git rev-parse --verify -q HEAD >/dev/null ||
+        { gryps_fail odklep-pusto 'Brak commitów w repozytorium, nie ma czego cofać.'; return 1; }
+    if gryps_fail_in_progress; then return 1; fi
+    if ! git rev-parse --verify -q "HEAD~$n" >/dev/null; then
+        if [ "$n" -eq 1 ]; then
+            gryps_fail odklep-root 'HEAD to pierwszy commit w repozytorium, nie ma do czego się cofać.' \
+                'Popraw go zamiast cofać: gryps przyklep --amend -m "nowy opis"'
+        else
+            total="$(git rev-list --count HEAD)"
+            gryps_fail odklep-za-malo 'Za mało commitów w historii.' \
+                "Chcesz cofnąć $n, a da się najwyżej $((total - 1)) (commitów w historii HEAD: $total, pierwszego nie odklepiesz)."
+        fi
+        return 1
+    fi
+    if [ -n "$(git rev-list --merges "HEAD~$n..HEAD")" ]; then
+        gryps_fail odklep-merge 'W cofanym zakresie jest commit scalający (merge); odklep go nie rozplącze.' \
+            'Bezpiecznie odwrócisz merge przez: gryps kasacja -m 1 <hash>' \
+            'Świadomie i bez GRYPS: git reset'
+        return 1
+    fi
+    unpub="$(git rev-list --count "HEAD~$n..HEAD" --not --remotes)"
+    pub=$((n - unpub))
+    if [ "$pub" -gt 0 ]; then
+        if [ "$force" -eq 0 ]; then
+            gryps_fail odklep-wywiezione 'Część cofanych commitów jest już na remote. Nic nie zmieniłem.' \
+                "Wywiezione: $pub z $n (wg lokalnych refs/remotes, czyli stanu z ostatniego gryps ucho)." \
+                'Bezpieczne cofnięcie opublikowanej zmiany: gryps kasacja <hash>' \
+                'Świadome przepisanie historii: gryps odklep -f, potem gryps wywozka --force-with-lease'
+            return 1
+        fi
+        gryps_tell warning odklep-wywiezione
+    fi
+    old_head="$(git rev-parse HEAD)"
+    git diff --cached --quiet || staged_before=1
+    git reset --soft "HEAD~$n"
+    rc=$?
+    if [ "$rc" -ne 0 ]; then gryps_tell error odklep; return "$rc"; fi
+    gryps_tell ok odklep
+    if [ "$GRYPS_TTY" -eq 1 ]; then
+        printf 'Odklepane commity:\n' >&2
+        shown=$((n < 5 ? n : 5))
+        git log --no-color --format='  %h %s' -n "$shown" "HEAD..$old_head" | LC_ALL=C tr -d '\000-\011\013-\037\177' >&2
+        [ "$n" -le 5 ] || printf '  …i %s więcej\n' "$((n - 5))" >&2
+        [ "$staged_before" -eq 0 ] || gryps_tell info odklep-zmieszane
+        printf 'Co wróciło: gryps kwity --staged\n' >&2
+        printf 'Ten sam opis i autor: gryps przyklep -C ORIG_HEAD\n' >&2
+        printf 'Zmiana zdania: git reset --soft %s\n' "$old_head" >&2
+    fi
+    return 0
+}
+
+# wykipruj: kontrolowany git clean -d (nigdy -ff). Podgląd i zgoda albo jawne -f.
+gryps_wykipruj() {
+    local dry=0 force=0 ignored='' seen_dd=0 arg list again rc
+    local -a spec flags
+    spec=()
+    check_repo
+    for arg in "$@"; do
+        if [ "$seen_dd" -eq 1 ]; then spec+=("$arg"); continue; fi
+        case "$arg" in
+            --) seen_dd=1 ;;
+            -n|--dry-run) dry=1 ;;
+            -f|--force) force=1 ;;
+            -x|-X)
+                if [ -n "$ignored" ] && [ "$ignored" != "$arg" ]; then
+                    gryps_error 'Opcje -x i -X wykluczają się: -x usuwa także ignorowane, -X tylko ignorowane.'
+                    return 1
+                fi
+                ignored="$arg" ;;
+            -*)
+                gryps_error "Wykipruj nie przyjmuje opcji: $(clean_cmd "$arg"). Dozwolone: -n, -f, -x, -X, -- ścieżki."
+                gryps_error 'Nic nie usunąłem. Pełna kontrola: git clean'
+                return 1 ;;
+            *) spec+=("$arg") ;;
+        esac
+    done
+    [ "${#spec[@]}" -gt 0 ] || spec=(':(top)')
+    flags=(-d)
+    [ -z "$ignored" ] || flags+=("$ignored")
+    list="$(git clean -n "${flags[@]}" -- "${spec[@]}")"
+    rc=$?
+    if [ "$rc" -ne 0 ]; then gryps_tell error wykipruj; return "$rc"; fi
+    if [ -z "$list" ]; then gryps_tell empty wykipruj; return 0; fi
+    if [ "$force" -eq 1 ] && [ "$dry" -eq 0 ]; then
+        git clean -f "${flags[@]}" -- "${spec[@]}"
+        rc=$?
+        if [ "$rc" -eq 0 ]; then gryps_tell ok wykipruj; else gryps_tell error wykipruj; fi
+        return "$rc"
+    fi
+    gryps_tell intro wykipruj
+    [ "$ignored" != -x ] || gryps_tell warning wykipruj-ignorowane
+    printf '%s\n' "$list"
+    [ "$dry" -eq 0 ] || return 0
+    potwierdz '🧹 Usunąć te pliki? Nie odzyska ich ani Git, ani gryps cynk.' || { gryps_tell cancel wykipruj; return 1; }
+    # Best effort: między podglądem a zgodą ktoś mógł dorzucić albo zabrać pliki.
+    again="$(git clean -n "${flags[@]}" -- "${spec[@]}")" || { gryps_tell error wykipruj; return 1; }
+    if [ "$again" != "$list" ]; then
+        gryps_fail wykipruj-zmiana 'Lista plików zmieniła się po podglądzie. Nic nie usunąłem.' 'Uruchom jeszcze raz: gryps wykipruj'
+        return 1
+    fi
+    git clean -f "${flags[@]}" -- "${spec[@]}"
+    rc=$?
+    if [ "$rc" -eq 0 ]; then gryps_tell ok wykipruj; else gryps_tell error wykipruj; fi
+    return "$rc"
+}
+
+# tabor <baza> [opcje]: git rebase. Bez autostash, bez force-push, bez -f od GRYPS.
+gryps_tabor() {
+    local arg control='' autostash=0 interactive=0 base='' simple=1 refs=0 before rc moved behind ahead
+    check_repo
+    for arg in "$@"; do
+        case "$arg" in
+            --continue|--abort|--skip|--quit|--edit-todo|--show-current-patch) control="$arg" ;;
+            --autostash) autostash=1 ;;
+            -i|--interactive) interactive=1 ;;
+            --rebase-merges) ;;
+            -*) simple=0 ;;
+            *) refs=$((refs + 1)); base="$arg" ;;
+        esac
+    done
+    if [ -n "$control" ]; then
+        before="$(git rev-parse -q --verify HEAD)"
+        git rebase "$@"
+        rc=$?
+        gryps_tabor_result "$rc" "$before" '' "$control"
+        return "$?"
+    fi
+    if [ "$#" -eq 0 ]; then
+        gryps_error 'Dokąd tabor? Podaj bazę, np. gryps tabor main albo gryps tabor origin/main'
+        return 1
+    fi
+    git rev-parse --verify -q HEAD >/dev/null || { gryps_error 'Brak commitów, nie ma czego przewozić.'; return 1; }
+    if gryps_fail_in_progress; then return 1; fi
+    if [ "$autostash" -eq 0 ] && { ! git diff --quiet || ! git diff --cached --quiet; }; then
+        gryps_fail tabor-brudno 'Masz nieprzyklepane zmiany w śledzonych plikach; rebase ich nie zabierze.' \
+            'Schowaj je: gryps dziupla, przyklep: gryps przyklep "opis", albo: gryps tabor <baza> --autostash'
+        return 1
+    fi
+    if [ "$interactive" -eq 1 ] && [ ! -t 0 ]; then
+        gryps_error 'Tabor -i potrzebuje terminala (edytor listy commitów). Nic nie ruszyłem.'
+        return 1
+    fi
+    if [ "$simple" -eq 1 ] && [ "$refs" -eq 1 ]; then
+        if ! git rev-parse --verify -q "$base^{commit}" >/dev/null; then
+            gryps_fail tabor-baza "Nie znam bazy: $(clean_cmd "$base")." 'Sprawdź nazwy: gryps celka -a, a świeże z serwera: gryps ucho'
+            return 1
+        fi
+        ahead="$(git rev-list --count "$base..HEAD")"
+        moved="$(git rev-list --count "$base..HEAD" --not --remotes)"
+        [ $((ahead - moved)) -le 0 ] || gryps_tell warning tabor-wywiezione
+    else
+        base=''
+    fi
+    before="$(git rev-parse HEAD)"
+    git rebase "$@"
+    rc=$?
+    gryps_tabor_result "$rc" "$before" "$base" ''
+}
+gryps_tabor_result() {
+    local rc="$1" before="$2" base="$3" control="$4" now ahead behind
+    now="$(git rev-parse -q --verify HEAD)"
+    if [ "$rc" -eq 0 ]; then
+        case "$control" in
+            --abort) gryps_tell ok tabor-abort; return 0 ;;
+            --quit|--edit-todo|--show-current-patch) return 0 ;;
+        esac
+        if gryps_rebase_in_progress; then gryps_tell info tabor-postoj; return 0; fi
+        if [ -z "$control" ] && [ "$now" = "$before" ]; then gryps_tell empty tabor; return 0; fi
+        if [ -n "$base" ]; then gryps_tell ok tabor "$base" "$(git rev-list --count "$base..HEAD")"
+        else gryps_tell ok tabor-dalej; fi
+        if git rev-parse -q --verify '@{u}' >/dev/null 2>&1; then
+            ahead="$(git rev-list --count '@{u}..HEAD')"
+            behind="$(git rev-list --count 'HEAD..@{u}')"
+            if [ "$ahead" -gt 0 ] && [ "$behind" -gt 0 ]; then gryps_tell warning tabor-wywozka; fi
+        fi
+        return 0
+    fi
+    if gryps_rebase_in_progress; then
+        if [ -n "$(git ls-files -u)" ]; then
+            gryps_fail tabor-konflikt 'Rebase zatrzymał się na konflikcie.'
+            gryps_conflict_files
+        else
+            gryps_fail tabor-stoi 'Rebase zatrzymał się w połowie drogi.'
+        fi
+        gryps_error 'Dalej: gryps lipo, popraw pliki, gryps skitraj, gryps tabor --continue'
+        gryps_error 'Albo: gryps tabor --skip (pomiń ten commit) lub gryps tabor --abort (powrót do stanu sprzed taboru)'
+    else
+        gryps_tell error tabor
+    fi
+    return "$rc"
+}
+
+# podkopsaj <commit|zakres>... [opcje]: git cherry-pick bez dodatkowych flag.
+gryps_podkopsaj() {
+    local arg control='' mainline=0 nocommit=0 skip_next=0 before rc
+    check_repo
+    for arg in "$@"; do
+        case "$arg" in
+            --continue|--abort|--skip|--quit) control="$arg" ;;
+            -m|--mainline|-m*|--mainline=*) mainline=1 ;;
+            -n|--no-commit) nocommit=1 ;;
+        esac
+    done
+    before="$(git rev-parse -q --verify HEAD)"
+    if [ -n "$control" ]; then
+        git cherry-pick "$@"
+        rc=$?
+        gryps_podkopsaj_result "$rc" "$before" "$nocommit" "$control"
+        return "$?"
+    fi
+    if [ "$#" -eq 0 ]; then
+        gryps_error 'Co przemycić? Podaj commit, np. gryps podkopsaj a1b2c3d'
+        return 1
+    fi
+    if gryps_fail_in_progress; then return 1; fi
+    if [ "$mainline" -eq 0 ]; then
+        for arg in "$@"; do
+            if [ "$skip_next" -eq 1 ]; then skip_next=0; continue; fi
+            case "$arg" in
+                --strategy|--strategy-option|-X|-S|--gpg-sign) skip_next=1; continue ;;
+                -*|*..*) continue ;;
+            esac
+            git rev-parse --verify -q "$arg^{commit}" >/dev/null || continue
+            if [ -n "$(git rev-list --merges --max-count=1 "$arg^!")" ]; then
+                gryps_fail podkopsaj-merge "$(clean_cmd "$arg") to commit scalający (merge); trzeba wskazać rodzica." \
+                    "Wskaż rodzica: gryps podkopsaj -m 1 $(clean_cmd "$arg")"
+                return 1
+            fi
+        done
+    fi
+    git cherry-pick "$@"
+    rc=$?
+    gryps_podkopsaj_result "$rc" "$before" "$nocommit" ''
+}
+gryps_podkopsaj_result() {
+    local rc="$1" before="$2" nocommit="$3" control="$4" count
+    if [ "$rc" -eq 0 ]; then
+        case "$control" in
+            --abort) gryps_tell ok podkopsaj-abort; return 0 ;;
+            --quit) return 0 ;;
+        esac
+        if [ "$nocommit" -eq 1 ]; then gryps_tell ok podkopsaj-nocommit; return 0; fi
+        if [ -n "$before" ]; then count="$(git rev-list --count "$before..HEAD")"
+        else count="$(git rev-list --count HEAD)"; fi
+        if [ -n "$control" ]; then gryps_tell ok podkopsaj-dalej
+        else gryps_tell ok podkopsaj "$count"; fi
+        return 0
+    fi
+    if [ -n "$(git ls-files -u)" ]; then
+        gryps_fail podkopsaj-konflikt 'Cherry-pick zatrzymał się na konflikcie.'
+        gryps_conflict_files
+        gryps_error 'Dalej: popraw pliki, gryps skitraj, gryps podkopsaj --continue'
+        gryps_error 'Albo: gryps podkopsaj --skip (pomiń ten commit) lub gryps podkopsaj --abort (stan sprzed przemytu)'
+    elif [ -e "$(git rev-parse --git-path CHERRY_PICK_HEAD)" ] && git diff --quiet && git diff --cached --quiet; then
+        gryps_fail podkopsaj-pusty 'Ten commit nie wnosi zmian: jego zawartość już tu jest.' \
+            'Pomiń go: gryps podkopsaj --skip (albo przerwij: gryps podkopsaj --abort)'
+    else
+        gryps_tell error podkopsaj
+    fi
+    return "$rc"
+}
+
+# skitrac odsiedział swoje w 1.4.1: bez aliasu, bez wykonywania git add.
+gryps_retired_skitrac() {
+    local args=''
+    [ "$#" -eq 0 ] || args=" $(clean_cmd "$*")"
+    if [ "$GRYPS_TTY" -eq 1 ]; then
+        printf '🚨 [STARA BAJERA]\nMłody, stary gryps skitrac odsiedział swoje. Teraz mów: gryps skitraj%s\n' "$args" >&2
+        printf 'Nic nie ruszyłem.\n' >&2
+    else
+        gryps_error "Komenda skitrac została wycofana w 1.4.1. Użyj: gryps skitraj$args"
+        gryps_error 'Nic nie zmieniłem.'
+    fi
+    return 1
+}
+
 unknown_command() {
     local input hint=''
     input="$(clean_cmd "$1")"
@@ -644,6 +1083,11 @@ unknown_command() {
       meldunke|meldnuek) hint='meldunek';;
       kartoetka|kartotek) hint='kartoteka';;
       kasacj|kasacjaa) hint='kasacja';;
+      odklepp|odklp|odklap|odklęp) hint='odklep';;
+      wykipuj|wykiperuj|wykipr|wykipróż) hint='wykipruj';;
+      tabur|tbor|tabór) hint='tabor';;
+      podkopsj|podkopsa|podkopsać) hint='podkopsaj';;
+      skitraj*|skitrać|skitrał) hint='skitraj';;
     esac
     if [ "$GRYPS_TTY" -eq 1 ]; then
         gryps_error "🚨 [LEWY GRYPS] Chyba ci, młody, źle bajerę przewinęli, bo nie ma takiego grypsu: '$input'."
@@ -659,7 +1103,7 @@ CMD="${1:-}"
 [ "$#" -eq 0 ] || shift
 if [[ "${1:-}" == '-h' || "${1:-}" == '--help' ]]; then
     show_cmd_help "$CMD"
-    exit 0
+    exit "$?"
 fi
 if ! command -v git >/dev/null 2>&1; then
     case "$CMD" in ''|pomoc|-h|--help|help|kmina|bajera|podpowiedzi|-v|--version|wersja) ;;
@@ -681,10 +1125,10 @@ case "$CMD" in
             if [ -z "$(git status --porcelain)" ]; then gryps_tell empty lipo; git status -sb
             else gryps_read lipo status -sb; fi
         else gryps_read lipo status "$@"; fi ;;
-    skitrac)
+    skitraj)
         check_repo
-        if [ "$#" -eq 0 ]; then gryps_run skitrac add -A
-        else gryps_run skitrac add "$@"; fi ;;
+        if [ "$#" -eq 0 ]; then gryps_run skitraj add -A
+        else gryps_run skitraj add "$@"; fi ;;
     przyklep)
         check_repo
         [ "$#" -gt 0 ] || { gryps_error 'Bez grypsu nic nie przyklepię. Przykład: gryps przyklep "Czysta robota"'; exit 1; }
@@ -788,7 +1232,10 @@ case "$CMD" in
         gryps_error 'Kipisz usuwa nieprzyklepane zmiany tracked (staged i unstaged). Nie usuwa plików nieśledzonych.'
         if [[ "${1:-}" == '-f' || "${1:-}" == '--force' ]]; then shift
         else git status --short; potwierdz '🚨 Skasować zmiany śledzonych plików?' || { gryps_tell cancel kipisz; exit 1; }; fi
-        gryps_run kipisz reset --hard "$@" ;;
+        gryps_run kipisz reset --hard "$@" || exit "$?"
+        if [ "$GRYPS_TTY" -eq 1 ] && [ -n "$(git ls-files --others --exclude-standard -- ':(top)')" ]; then
+            gryps_tell info kipisz-wykipruj
+        fi ;;
     kwity)
         check_repo; gryps_machine "$@"
         single=0
@@ -881,5 +1328,10 @@ case "$CMD" in
             potwierdz '⚠️  Czy na pewno odkręcić niezapisane zmiany?' || { gryps_tell cancel odkrec; exit 1; }
         fi
         gryps_run odkrec restore --worktree -- "${paths[@]}" ;;
+    odklep) gryps_odklep "$@" ;;
+    wykipruj) gryps_wykipruj "$@" ;;
+    tabor) gryps_tabor "$@" ;;
+    podkopsaj) gryps_podkopsaj "$@" ;;
+    skitrac) gryps_retired_skitrac "$@" ;;
     *) unknown_command "$CMD" ;;
 esac

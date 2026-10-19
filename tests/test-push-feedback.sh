@@ -43,7 +43,7 @@ fi
 git reset -q -- staged.txt; rm staged.txt
 printf unstaged >> base.txt
 run_tty wywozka
-contains 'unstaged -> sugeruje skitrac' 'Najpierw gryps skitrac'
+contains 'unstaged -> sugeruje skitraj' 'Najpierw gryps skitraj'
 git restore -- base.txt
 printf ignored > new.txt
 run_tty wywozka

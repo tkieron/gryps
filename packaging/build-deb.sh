@@ -38,7 +38,7 @@ Maintainer: $MAINTAINER
 Homepage: https://github.com/tkieron/gryps
 Description: Git w grypserze - system kontroli wersji dla prawilnych ludzi
  Gryps to nakladka na Gita, ktora tlumaczy codzienne komendy na gware
- wiezienna (grypsere): skitrac, przyklep, wywozka, przerzutka, kipisz...
+ wiezienna (grypsere): skitraj, przyklep, wywozka, przerzutka, kipisz...
  Zawiera nowe komendy kwity, odkitraj, kapus, dziara, cynk, kasacja,
  uklady, odkrec, podpowiedzi TAB oraz zabawne komunikaty bledow. Pod spodem zawsze dziala zwykly git.
 CTRL

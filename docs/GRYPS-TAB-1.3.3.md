@@ -6,7 +6,7 @@
 📦 CODZIENNA ROBOTA
   lipo          Co słychać pod celą? — git status -sb
   kwity         Wyciągnij dowody zmian — git diff + git diff --cached
-  skitrac       Schowaj fanty do indeksu — git add [-A]
+  skitraj       Schowaj fanty do indeksu — git add [-A]
 
 🕵️ DOCHODZENIE
   kapus         Kto sypnął tę linijkę? — git blame

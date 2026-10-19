@@ -39,7 +39,7 @@ STEPS = [
     ("gryps przerzutka -c nowa-robota", 900, None),
     ("echo 'zamek: naprawiony' >> drzwi.txt", 250, None),
     ("gryps lipo -s", 1300, None),
-    ("gryps skitrac", 900, None),
+    ("gryps skitraj", 900, None),
     ('gryps przyklep "Naprawiony zamek w drzwiach"', 1100, None),
     ("gryps wywozka", 2400, None),
     ("clear", 0, None),

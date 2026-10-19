@@ -9,14 +9,24 @@ PASS=0 FAIL=0
 ok() { printf '  ✅ %s\n' "$1"; PASS=$((PASS+1)); }
 fail() { printf '  ❌ %s\n' "$1"; FAIL=$((FAIL+1)); }
 expect() { local name="$1"; shift; if "$@"; then ok "$name"; else fail "$name"; fi; }
-contains() { local v; for v in "${COMPREPLY[@]}"; do [[ "$v" == "$1" ]] && return 0; done; return 1; }
-not_contains() { local v; for v in "${COMPREPLY[@]}"; do [[ "$v" == "$1" ]] && return 1; done; return 0; }
+contains() { local v; for v in ${COMPREPLY[@]+"${COMPREPLY[@]}"}; do [[ "$v" == "$1" ]] && return 0; done; return 1; }
+not_contains() { local v; for v in ${COMPREPLY[@]+"${COMPREPLY[@]}"}; do [[ "$v" == "$1" ]] && return 1; done; return 0; }
 complete_words() { COMP_WORDS=("$@"); COMP_CWORD=$((${#COMP_WORDS[@]}-1)); _gryps_completions; }
 complete_words gryps kw
 expect 'Bash uzupełnia kwity' contains kwity
 expect 'Bash bez opisów w nazwach' not_contains 'kwity — git diff'
 complete_words gryps pod
 expect 'Bash podpowiada nowe polecenie' contains podpowiedzi
+expect 'Bash podpowiada podkopsaj' contains podkopsaj
+complete_words gryps ski
+expect 'Bash: ski<TAB> = skitraj' contains skitraj
+expect 'Bash: skitrac nie jest kandydatem' not_contains skitrac
+complete_words gryps od
+expect 'Bash: od<TAB> zawiera odklep' contains odklep
+complete_words gryps ta
+expect 'Bash: ta<TAB> zawiera tabor' contains tabor
+complete_words gryps wyk
+expect 'Bash: wyk<TAB> zawiera wykipruj' contains wykipruj
 complete_words gryps --cicho kap
 expect 'Bash po --cicho' contains kapus
 complete_words gryps kmina cyn
@@ -38,12 +48,12 @@ function ble/complete/cand/yield {
   ble_inserted+=("${2:prefix_len}")
   cand_count=$((cand_count+1))
 }
-contains_ble() { local x; for x in "${ble_inserted[@]}"; do [[ "$x" == "$1" ]] && return 0; done; return 1; }
+contains_ble() { local x; for x in ${ble_inserted[@]+"${ble_inserted[@]}"}; do [[ "$x" == "$1" ]] && return 0; done; return 1; }
 reset_ble() { ble_seen=(); ble_inserted=(); ble_prefix_lens=(); cand_count=0; }
-ble_zero_prefix() { local n; for n in "${ble_prefix_lens[@]}"; do [[ "$n" == 0 ]] || return 1; done; }
+ble_zero_prefix() { local n; for n in ${ble_prefix_lens[@]+"${ble_prefix_lens[@]}"}; do [[ "$n" == 0 ]] || return 1; done; }
 reset_ble
 complete_words gryps kap
-if [[ ${COMPREPLY[*]} == '' && ${ble_seen[*]} == *'kapus|'*'git blame'* ]]; then ok 'ble.sh: osobno kandydat i opis zakończony Git'; else fail 'ble.sh: osobno kandydat i opis zakończony Git'; fi
+if [[ ${COMPREPLY[*]:-} == '' && ${ble_seen[*]:-} == *'kapus|'*'git blame'* ]]; then ok 'ble.sh: osobno kandydat i opis zakończony Git'; else fail 'ble.sh: osobno kandydat i opis zakończony Git'; fi
 if contains_ble kapus && ble_zero_prefix; then ok 'ble.sh: kap<TAB> wstawia pełne kapus'; else fail 'ble.sh: kap<TAB> wstawia pełne kapus'; fi
 reset_ble
 complete_words gryps wy
@@ -61,13 +71,28 @@ reset_ble
 complete_words gryps ''
 if contains_ble wywozka && ble_zero_prefix; then ok 'ble.sh: pusty prefiks daje całe nazwy'; else fail 'ble.sh: pusty prefiks daje całe nazwy'; fi
 reset_ble
+complete_words gryps od
+if contains_ble odklep && contains_ble odkitraj && contains_ble odkrec && ble_zero_prefix; then ok 'ble.sh: od<TAB> wstawia pełne odklep/odkitraj/odkrec'; else fail 'ble.sh: od<TAB> pełne nazwy'; fi
+reset_ble
+complete_words gryps tab
+if contains_ble tabor && ble_zero_prefix; then ok 'ble.sh: tab<TAB> wstawia pełne tabor'; else fail 'ble.sh: tab<TAB> wstawia pełne tabor'; fi
+reset_ble
+complete_words gryps ski
+if contains_ble skitraj && ! contains_ble skitrac && ble_zero_prefix; then ok 'ble.sh: ski<TAB> wstawia pełne skitraj, bez skitrac'; else fail 'ble.sh: ski<TAB> skitraj'; fi
+reset_ble
+complete_words gryps wyk
+if contains_ble wykipruj && ble_zero_prefix && [[ ${ble_seen[*]:-} == *'wykipruj|'*'git clean -d'* ]]; then ok 'ble.sh: wyk<TAB> wykipruj z opisem git clean'; else fail 'ble.sh: wyk<TAB> wykipruj'; fi
+reset_ble
+complete_words gryps pod
+if contains_ble podkopsaj && contains_ble podpowiedzi && ble_zero_prefix; then ok 'ble.sh: pod<TAB> podkopsaj i podpowiedzi'; else fail 'ble.sh: pod<TAB>'; fi
+reset_ble
 complete_words gryps wyv
 if (( ${#ble_inserted[@]} == 0 )); then ok 'ble.sh: brak fałszywych kandydatów'; else fail 'ble.sh: brak fałszywych kandydatów'; fi
 unset cand_count
 unset -f 'ble/complete/cand/yield.initialize' 'ble/complete/cand/yield'
 # Catalog guarantees stable, unique names with last field = Git translation (except help/alias).
-if awk -F'|' 'BEGIN{e=0} !/^#/ { if (NF!=4 || seen[$2]++ || $4 !~ /^(git |gryps )/) e=1; count++ } END {if (count!=40) e=1; exit e}' "$ROOT/completions/gryps-catalog.tsv"; then ok '40 unikalnych pozycji i mapowanie Git'; else fail 'katalog grypsów'; fi
-for name in kwity odkitraj kapus dziara cynk kasacja uklady odkrec ksywa meta meldunek kartoteka; do
+if awk -F'|' 'BEGIN{e=0} !/^#/ { if (NF!=4 || seen[$2]++ || $4 !~ /^(git |gryps )/) e=1; count++ } END {if (count!=44) e=1; exit e}' "$ROOT/completions/gryps-catalog.tsv"; then ok '44 unikalne pozycje i mapowanie Git'; else fail 'katalog grypsów'; fi
+for name in kwity odkitraj kapus dziara cynk kasacja uklady odkrec ksywa meta meldunek kartoteka skitraj odklep wykipruj tabor podkopsaj; do
   if grep -q "^.*|$name|" "$ROOT/completions/gryps-catalog.tsv" && grep -q "^[[:space:]]*$name) REPLY=" "$ROOT/completions/gryps.bash" && grep -q "'$name:" "$ROOT/completions/_gryps"; then ok "Katalog spójny dla $name"; else fail "Katalog spójny dla $name"; fi
 done
 # Zsh group declarations and tags must exist for every group.

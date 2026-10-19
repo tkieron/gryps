@@ -153,7 +153,7 @@ def scene_hook(c, t):
 
 
 CARDS = [
-    ("git add", "gryps skitrac", "skitrać = schować", None),
+    ("git add", "gryps skitraj", "skitrać = schować", None),
     ("git commit -m", "gryps przyklep", "przyklepanie = dowód w papierach", None),
     ("git push", "gryps wywozka", "towar jedzie na serwer", "🚐"),
     ("git pull", "gryps rakieta", "rakieta = paczka z wolki", "📦"),
@@ -191,7 +191,7 @@ def record_terminal():
     with open(os.path.join(cwd, "drzwi.txt"), "a") as f:
         f.write("zamek: naprawiony\n")
     steps = [
-        ("gryps skitrac", 700, None),
+        ("gryps skitraj", 700, None),
         ('gryps przyklep "Zamek naprawiony"', 900, None),
         ("gryps wywozka", 1700, None),
         ("echo syf >> drzwi.txt", 150, None),

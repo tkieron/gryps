@@ -1,6 +1,6 @@
 '\" -*- coding: UTF-8 -*-
 .\" Strona podręcznika dla gryps(1)
-.TH GRYPS 1 "2026-10-17" "gryps __VERSION__" "Podręcznik Gryps"
+.TH GRYPS 1 "2026-10-19" "gryps __VERSION__" "Podręcznik Gryps"
 .SH NAZWA
 gryps \- Git w grypserze, system kontroli wersji dla prawilnych ludzi
 .SH SKŁADNIA
@@ -40,9 +40,10 @@ Zawija (klonuje) repozytorium z wolki na dysk.
 Patrzysz przez lipo (oko) na celę: co zmienione, co skitrane, co nowe.
 .RB ( "git status" )
 .TP
-.BR skitrac " [plik...]"
+.BR skitraj " [plik...]"
 Kitra fanty do poczekalni przed przyklepaniem. Bez argumentów kitra
 wszystko w całym repo, łącznie z usuniętymi plikami.
+Od 1.4.1 nazwa brzmi skitraj (dawniej skitrac, bez aliasu zgodności).
 .RB ( "git add \-A" " / " "git add" )
 .TP
 .BI przyklep " wiadomość"
@@ -97,6 +98,23 @@ Zagląda przez wizjer w szczegóły commita.
 Wyciąga kwity: bez argumentów rysuje zwięzły graf wszystkich cel,
 z argumentami działa jak zwykły log.
 .RB ( "git log \-\-graph \-\-oneline \-\-decorate \-\-all" )
+.TP
+\fBtabor\fR \fIbaza\fR [\fIopcje\fR]
+Przewozi commity bieżącej celki na wskazaną bazę. Baza jest wymagana (bez
+domyślnego upstreamu). Przy zmianach w śledzonych plikach odmawia, chyba że
+podasz \fB\-\-autostash\fP; \fB\-i\fP wymaga terminala. Ostrzega, gdy
+przewozi commity obecne na remote, ale nigdy nie robi wywózki ani force-push.
+Przy konflikcie zostawia rebase w toku: \fBgryps tabor \-\-continue\fP,
+\fB\-\-skip\fP albo \fB\-\-abort\fP. Pozostałe opcje (także \fB\-f\fP,
+czyli \-\-force\-rebase) trafiają do Gita bez zmian.
+.RB ( "git rebase" )
+.TP
+\fBpodkopsaj\fR \fIcommit|zakres\fR... [\fIopcje\fR]
+Przemyca wskazane commity z innej celi na bieżącą jako nowe commity
+(z \fB\-n\fP tylko do stagingu). Bez dodatkowych flag, także bez \fB\-x\fP.
+Merge commit wymaga \fB\-m 1\fP. Commit, którego zmiany już są, zostawia
+cherry-pick w toku: \fBgryps podkopsaj \-\-skip\fP.
+.RB ( "git cherry\-pick" )
 .SH DZIUPLA
 .TP
 .B dziupla
@@ -115,6 +133,59 @@ Lista wszystkich dziupli.
 .BR spusc " [\-f]"
 Bezpowrotnie kasuje dziuplę. Pyta o potwierdzenie; \fB\-f\fP pomija pytanie.
 .RB ( "git stash drop" )
+.SH AKTA, ŚLADY I POPRAWKI
+.TP
+.B kwity
+Wyświetla git diff unstaged oraz staged. Opcja \-\-staged ogranicza do indeksu.
+.RB ( "git diff" )
+.TP
+.B odkitraj
+Wycofuje staging bez utraty plików.
+.RB ( "git restore \-\-staged" )
+.TP
+\fBkapus\fR [\-L od,do] \-\- \fIplik\fR
+Historia autorów linii. Wymaga pliku.
+.RB ( "git blame" )
+.TP
+.BR dziara " [nazwa]"
+Lista tagów albo utworzenie taga.
+.RB ( "git tag" )
+.TP
+.B cynk
+Ostatnie 20 wpisów reflog HEAD.
+.RB ( "git reflog" )
+.TP
+.BI kasacja " hash"
+Odwraca wskazany commit nowym commitem, bez edytora. Commit niewywieziony
+cofniesz z zachowaniem zmian w stagingu przez \fBgryps odklep\fP.
+.RB ( "git revert \-\-no\-edit" )
+.TP
+.B uklady
+Adresy zdalnych repozytoriów lub podkomendy remote.
+.RB ( "git remote \-v" )
+.TP
+\fBodkrec\fR [\-f] \-\- \fIplik\fR
+Porzuca jedynie zmiany unstaged, wymaga ścieżki i potwierdzenia. \-f pomija potwierdzenie.
+.RB ( "git restore \-\-worktree" )
+.SH KARTOTEKA GRYPSUJĄCEGO
+.TP
+.BR ksywa " [\-\-global] [nazwa]"
+Odczytuje lub ustawia user.name; zapis domyślnie lokalny dla repozytorium.
+.RB ( "git config user.name" )
+.TP
+.BR meta " [\-\-global] [email]"
+Odczytuje lub ustawia user.email; zapis domyślnie lokalny dla repozytorium.
+.RB ( "git config user.email" )
+.TP
+.BR meldunek " [\-\-global] [nazwa email]"
+Ustawia oba pola. Bez parametrów pyta interaktywnie, poza TTY wymaga dwóch wartości.
+.RB ( "git config user.name + user.email" )
+.TP
+.B kartoteka
+Pokazuje efektywne dane Git i zakres ich pochodzenia.
+.RB ( "git config \-\-show\-origin" )
+.PP
+Przy braku tożsamości git commit, gryps przyklep wskazuje ksywa/meta/meldunek.
 .SH AWARYJNE I EDUKACYJNE
 .TP
 .BR kipisz " [\-f]"
@@ -124,6 +195,24 @@ blokują przywracanie plików śledzonych.
 Najpierw pokazuje status i pyta o potwierdzenie. Bez terminala odmawia,
 chyba że podasz \fB\-f\fP.
 .RB ( "git reset \-\-hard" )
+.TP
+.BR odklep " [N] [\-f]"
+Cofa ostatnie N commitów (domyślnie 1), a ich zmiany zostawia w stagingu;
+pliki na dysku zostają nietknięte. Nie przyjmuje innych opcji, więc
+\fB\-\-hard\fP nigdy nie dotrze do Gita. Odmawia przy pierwszym commicie
+repozytorium, przy merge w zakresie, w trakcie merge/rebase/cherry-pick oraz
+gdy commity są już na remote (według lokalnych refs/remotes, bez fetch);
+\fB\-f\fP świadomie na to pozwala, ale niczego nie wypycha. Cofnięte
+commity odzyskasz przez ORIG_HEAD lub \fBgryps cynk\fP.
+.RB ( "git reset \-\-soft HEAD~N" )
+.TP
+.BR wykipruj " [\-n] [\-f] [\-x|\-X] [[\-\-] ścieżki...]"
+Usuwa NIEŚLEDZONE pliki i katalogi w całym repo lub we wskazanych ścieżkach.
+UWAGA: usuniętych plików nie odzyska ani Git, ani reflog. Bez \fB\-f\fP
+pokazuje listę i pyta o zgodę (bez terminala odmawia); \fB\-n\fP tylko
+pokazuje. Pliki ignorowane zostają; \fB\-x\fP usuwa także ignorowane
+(np. .env), \fB\-X\fP tylko ignorowane. Zagnieżdżone repozytoria zostają.
+.RB ( "git clean \-d" )
 .TP
 .BR pomoc ", " \-h
 Lista komend. Długi tekst otwiera się w
@@ -142,7 +231,7 @@ Wersja Grypsu.
 .nf
 gryps jumaj https://github.com/ekipa/projekt.git
 gryps przerzutka \-c nowa\-robota
-gryps skitrac
+gryps skitraj
 gryps przyklep "Naprawiony zamek w drzwiach"
 gryps wywozka
 .fi
@@ -152,7 +241,20 @@ Awaryjna przerzutka z rozgrzebanym kodem:
 gryps dziupla && gryps przerzutka hotfix
 gryps przerzutka \- && gryps wyjmij
 .fi
+.PP
+Ratunek bez kipiszu:
+.nf
+gryps odklep                     # ostatni commit wraca do stagingu
+gryps przyklep \-C ORIG_HEAD      # przyklep ponownie z tym samym opisem
+gryps wykipruj \-n                # tylko podgląd nieśledzonych plików
+gryps ucho && gryps tabor origin/main
+gryps podkopsaj a1b2c3d
+.fi
 .SH ŚRODOWISKO
+.TP
+.BR \-\-cicho ", " GRYPS_CICHO=1
+Opcja przed komendą (albo zmienna) wyłącza komentarze grypsowe, ale zachowuje dane Git.
+Bez terminala komentarzy nie ma i tak.
 .TP
 .B NO_COLOR
 Gdy ustawiona, gryps nie koloruje wyjścia. Kolory wyłączają się też same,
@@ -167,50 +269,3 @@ Gryps zwraca kod wyjścia wywołanej komendy git. Własne błędy
 Słownik gwary więziennej:
 https://www.zpozdrowieniem.pl/blog/gamzac\-grypsem\-slownik\-gwary\-wieziennej
 
-.SH GRYPS 1.3.0
-.TP
-.B kwity
-Wyswietla git diff unstaged oraz staged. Opcja --staged ogranicza do indeksu.
-.TP
-.B odkitraj
-Wycofuje staging bez utraty plikow (git restore --staged).
-.TP
-.B kapus
-Historia autorow linii: git blame. Wymaga pliku.
-.TP
-.B dziara
-Lista/utworzenie taga git tag.
-.TP
-.B cynk
-Ostatnie 20 wpisow git reflog HEAD.
-.TP
-.B kasacja
-Odwraca wskazany commit przez git revert --no-edit.
-.TP
-.B uklady
-Adresy zdalnych repozytoriow (git remote -v) lub podkomendy remote.
-.TP
-.B odkrec
-Porzuca jedynie zmiany unstaged (git restore --worktree), wymaga sciezki i potwierdzenia. -f pomija potwierdzenie.
-.TP
-.B --cicho
-Globalna opcja przed komenda wylacza komentarze grypsowe, ale zachowuje dane Git.
-.PP
-Dziupla bez argumentow ukrywa takze niesledzone pliki (-u), ale nie ignorowane.
-Rakowiec bez wskazanej strategii pull uzywa --ff-only.
-
-.SH GRYPS 1.4.0 — KARTOTEKA GRYPSUJĄCEGO
-.TP
-.BR ksywa " [--global] [nazwa]"
-Odczytuje lub ustawia user.name; zapis domyślnie lokalny dla repozytorium.
-.TP
-.BR meta " [--global] [email]"
-Odczytuje lub ustawia user.email; zapis domyślnie lokalny dla repozytorium.
-.TP
-.BR meldunek " [--global] [nazwa email]"
-Ustawia oba pola. Bez parametrów pyta interaktywnie, poza TTY wymaga dwóch wartości.
-.TP
-.B kartoteka
-Pokazuje efektywne dane Git i zakres ich pochodzenia.
-.PP
-Przy braku tożsamości git commit, gryps przyklep wskazuje ksywa/meta/meldunek.

@@ -60,8 +60,8 @@ echo "▶ Codzienna robota"
 fresh_repo cela
 mkdir sub && echo a > a.txt && echo b > sub/b.txt
 cd sub || exit 1
-run skitrac;            expect_code 0 "skitrac bez argumentów"
-check '[ "$(git diff --cached --name-only | wc -l)" -eq 2 ]' "skitrac z podkatalogu bierze całe repo"
+run skitraj;            expect_code 0 "skitraj bez argumentów"
+check '[ "$(git diff --cached --name-only | wc -l)" -eq 2 ]' "skitraj z podkatalogu bierze całe repo"
 cd .. || exit 1
 run przyklep;           expect_code 1 "przyklep bez opisu = kod 1"
 run przyklep Czysta robota bez cudzysłowu
@@ -89,7 +89,7 @@ run wywozka;            expect_code 0 "pierwsza wywózka"
 check 'git rev-parse --abbrev-ref "@{u}" >/dev/null 2>&1' "wywózka ustawia upstream"
 LC_ALL=C.UTF-8 LANGUAGE=pl run przerzutka -c nowa
 expect_code 0 "przerzutka -c"
-echo c > c.txt; "$GRYPS" skitrac >/dev/null; "$GRYPS" przyklep nowa >/dev/null
+echo c > c.txt; "$GRYPS" skitraj >/dev/null; "$GRYPS" przyklep nowa >/dev/null
 LANGUAGE=pl run kopsnij; expect_code 0 "kopsnij na nowej celce (polski git)"
 check '[ "$(git rev-parse --abbrev-ref "@{u}")" = "origin/nowa" ]' "upstream origin/nowa"
 run stojka;             expect_code 0 "stojka"
@@ -153,7 +153,7 @@ expect_code 0 "detached HEAD z jawnym refspec pozostaje obsługiwany"
  echo "▶ Wywózka bez serwera / bez celki"
 fresh_repo samotnia
 git remote remove origin
-echo x > x.txt; "$GRYPS" skitrac >/dev/null; "$GRYPS" przyklep x >/dev/null
+echo x > x.txt; "$GRYPS" skitraj >/dev/null; "$GRYPS" przyklep x >/dev/null
 run wywozka;            expect_code 1 "wywozka bez remote = kod 1"; expect_contains "Nie ma zdalnego serwera" "czytelny błąd bez remote"
 
 echo "▶ Błędy wywózki"
@@ -166,7 +166,7 @@ check '[[ "$OUT" != *"Odbierz najpierw rakietę"* ]]' "błąd serwera nie oznacz
 
 echo "▶ Konflikt na blatach"
 fresh_repo dymy
-echo baza > f.txt; "$GRYPS" skitrac >/dev/null; "$GRYPS" przyklep baza >/dev/null
+echo baza > f.txt; "$GRYPS" skitraj >/dev/null; "$GRYPS" przyklep baza >/dev/null
 "$GRYPS" przerzutka -c inna >/dev/null 2>&1
 echo inna > f.txt; "$GRYPS" przyklep -am inna >/dev/null
 "$GRYPS" przerzutka main >/dev/null 2>&1
