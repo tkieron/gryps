@@ -12,8 +12,8 @@
 
 Git w grypserze. Koniec z frajerskimi komendami.
 
-[![CI](https://github.com/__GH_USER__/gryps/actions/workflows/ci.yml/badge.svg)](https://github.com/__GH_USER__/gryps/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/__GH_USER__/gryps?label=wyrok)](https://github.com/__GH_USER__/gryps/releases/latest)
+[![CI](https://github.com/tkieron/gryps/actions/workflows/ci.yml/badge.svg)](https://github.com/tkieron/gryps/actions/workflows/ci.yml)
+[![Wydania](https://img.shields.io/badge/wyroki-GitHub%20Releases-blue)](https://github.com/tkieron/gryps/releases)
 [![Licencja: MIT](https://img.shields.io/badge/licencja-MIT-blue.svg)](LICENSE)
 
 </div>
@@ -60,7 +60,7 @@ Bogatsze menu ble.sh i Zsh: [GRYPS TAB](docs/GRYPS-TAB-1.3.3.md).
 
 ## Instalacja
 
-**Debian / Ubuntu** – pobierz `.deb` z [ostatniego wydania](https://github.com/__GH_USER__/gryps/releases/latest):
+**Debian / Ubuntu** – pobierz `.deb` z [ostatniego wydania](https://github.com/tkieron/gryps/releases/latest):
 
 ```bash
 sudo apt install ./gryps_*_all.deb
@@ -82,14 +82,14 @@ Instrukcja i dezinstalator: [packaging/macos/README-macOS.md](packaging/macos/RE
 
 ```bash
 mkdir -p ~/.local/bin
-curl -fsSL https://github.com/__GH_USER__/gryps/releases/latest/download/gryps -o ~/.local/bin/gryps
+curl -fsSL https://github.com/tkieron/gryps/releases/latest/download/gryps -o ~/.local/bin/gryps
 chmod +x ~/.local/bin/gryps
 ```
 
 **Ze źródeł** (z podpowiedziami pod TABem i `man gryps`):
 
 ```bash
-git clone https://github.com/__GH_USER__/gryps.git && cd gryps
+git clone https://github.com/tkieron/gryps.git && cd gryps
 make install PREFIX=~/.local     # albo: sudo make install
 ```
 
