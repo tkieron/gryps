@@ -35,7 +35,7 @@ Depends: git, bash (>= 3.2)
 Recommends: less, bash-completion
 Installed-Size: $INSTALLED_SIZE
 Maintainer: $MAINTAINER
-Homepage: https://github.com/__GH_USER__/gryps
+Homepage: https://github.com/tkieron/gryps
 Description: Git w grypserze - system kontroli wersji dla prawilnych ludzi
  Gryps to nakladka na Gita, ktora tlumaczy codzienne komendy na gware
  wiezienna (grypsere): skitrac, przyklep, wywozka, przerzutka, kipisz...
