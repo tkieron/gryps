@@ -325,6 +325,11 @@ gryps_tell() {
       ok:skitrac) phrase='Skitrane. Fanty czekają na przyklepanie.'; prefix='📦';;
       ok:przyklep) phrase='Przyklepane. Nawet klawisz tego nie zamiecie.'; prefix='✅';;
       ok:wywozka) phrase='Wywózka zakończona. Na bramie nie zatrzymali.'; prefix='🚐';;
+      empty:wywozka) phrase='Na wolce już wszystko mają. Nie ma czego wywozić.'; prefix='🚐';;
+      pending:wywozka-staged) phrase='Ej, ziomuś! Fanty już skitrane, ale papierów nie przyklepałeś. Najpierw: gryps przyklep "opis roboty", potem: gryps wywozka. Z pustego i Salomon nie naleje.'; prefix='📦';;
+      pending:wywozka-unstaged) phrase='Mordo, robota leży luzem. Najpierw gryps skitrac, potem gryps przyklep, dopiero wywozka.'; prefix='🧱';;
+      pending:wywozka-untracked) phrase='Na blacie leżą nowe fanty. Najpierw je skitraj i przyklep, inaczej nie pojadą.'; prefix='📂';;
+      warning:wywozka-staged) phrase='Uwaga, ziomuś: wysłane są tylko wcześniejsze przyklepane papiery. To, co nadal leży w stagingu, nie pojechało. Najpierw przyklep.'; prefix='⚠️';;
       ok:rakowiec) phrase='Rakieta odebrana. Bez szemranych blatów.'; prefix='📨';;
       ok:ucho) phrase='Ucho przy drzwiach. Wiemy, co na wolce piszczy.'; prefix='👂';;
       ok:celka) phrase='Nowa celka gotowa. Jeszcze trzeba się przerzucić.'; prefix='🔐';;
@@ -366,6 +371,44 @@ gryps_run() {
     if [ "$rc" -eq 0 ]; then gryps_tell ok "$key"
     else gryps_tell error "$key"; fi
     return "$rc"
+}
+# Podczas wywózki nie mylimy poprawnego git push z wypchnięciem nowych commitów.
+# Najczęstszy przypadek sprawdzamy tylko przy push bez argumentów i ze znanym upstreamem.
+# Sam git push zawsze wykonuje się normalnie, a jego kod wyjścia zostaje zachowany.
+gryps_push() {
+    local plain="$1" rc ahead='' push_remote='' tracking_remote='' branch=''
+    shift
+    if [ "$plain" -eq 1 ] && git rev-parse --verify HEAD >/dev/null 2>&1 &&
+       git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+        branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+        if [ -n "$branch" ]; then
+            tracking_remote="$(git config --get "branch.$branch.remote" || true)"
+            push_remote="$(git config --get "branch.$branch.pushRemote" || git config --get remote.pushDefault || true)"
+            if [ -z "$push_remote" ] || [ "$push_remote" = "$tracking_remote" ]; then
+                ahead="$(git rev-list --count '@{u}..HEAD' 2>/dev/null || true)"
+            fi
+        fi
+    fi
+    git "$@"
+    rc=$?
+    if [ "$rc" -ne 0 ]; then gryps_tell error wywozka; return "$rc"; fi
+    if [ "$ahead" = 0 ]; then
+        if ! git diff --cached --quiet --; then
+            gryps_tell pending wywozka-staged
+        elif ! git diff --quiet --; then
+            gryps_tell pending wywozka-unstaged
+        elif [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+            gryps_tell pending wywozka-untracked
+        else
+            gryps_tell empty wywozka
+        fi
+    else
+        gryps_tell ok wywozka
+        if ! git diff --cached --quiet --; then
+            gryps_tell warning wywozka-staged
+        fi
+    fi
+    return 0
 }
 gryps_read() {
     local key="$1" rc
@@ -476,10 +519,13 @@ case "$CMD" in
                 gryps_error 'Wywózka stoi pod bramą: kilka remote, brak wskazanego celu. Użyj gryps wywozka <remote> <branch>.'; exit 1
             fi
             case "$(git config --get push.default || printf simple)" in
-                simple|current|upstream) gryps_run wywozka -c push.default=current push --set-upstream ;;
-                *) gryps_run wywozka push ;;
+                simple|current|upstream) gryps_push 1 -c push.default=current push --set-upstream ;;
+                *) gryps_push 1 push ;;
             esac
-        else gryps_run wywozka push "$@"; fi ;;
+        else
+            if [ "$#" -eq 0 ]; then gryps_push 1 push
+            else gryps_push 0 push "$@"; fi
+        fi ;;
     rakowiec|rakieta)
         check_repo
         strategy=0

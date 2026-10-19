@@ -120,6 +120,7 @@ Gryps wywołuje prawdziwego Gita, ale ma kilka jawnych ułatwień i zabezpiecze�
 
 - `kipisz` i `spusc` pytają o potwierdzenie, a bez terminala odmawiają, dopóki nie dasz `-f`;
 - `skitrac` bez argumentów robi `git add -A`, czyli bierze całe repo, nie tylko bieżący katalog;
+- `wywozka` z ustawionym upstreamem sprawdza, czy są nowe commity. Gdy jest tylko staging, informuje o konieczności wykonania `przyklep`, zamiast fałszywie ogłaszać udany transport. Przy gotowych commitach wykonuje push i ostrzega, że nieprzyklepane zmiany nie zostały wysłane. W potokach i `--cicho` zachowuje czyste komunikaty Git.
 - `wywozka` na celce bez upstreamu (bez dodatkowych argumentów) dla `push.default=simple|upstream|current` używa `git -c push.default=current push --set-upstream`. Git **sam** wybiera remote z uwzględnieniem `branch.<celka>.pushRemote`, `remote.pushDefault` i innych ustawień; `origin` nie ma sztucznego pierwszeństwa. Przy `push.default=matching|nothing` zachowuje natywną semantykę Git. Jeśli przekażesz argumenty, trafią do `git push` bez zmian;
 - `przyklep` zbiera wyrazy opisu tylko do pierwszej opcji. Przykłady: `gryps przyklep "feat" --no-verify` oraz `gryps przyklep -m "feat" --amend`. Tekst zaczynający się od `-` podawaj w trybie z `-m`;
 - `dziupla` domyślnie chowa zmiany **śledzone i nieśledzone** (`git stash push -u`), z pominięciem plików `.gitignore`;

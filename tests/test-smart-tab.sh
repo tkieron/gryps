@@ -21,14 +21,48 @@ complete_words gryps --cicho kap
 expect 'Bash po --cicho' contains kapus
 complete_words gryps kmina cyn
 expect 'Bash podpowiada argument kmina' contains cynk
-# Active ble.sh can accept descriptions separately. Mock its API without installing ble.sh.
+# ble.sh returns full candidate names. COMP_PREFIX is NOT what the user typed:
+# it represents a candidate prefix that ble.sh removes during insertion.
+# Regression: with COMP_PREFIX="wy", selecting wywozka inserted only "wozka".
 _ble_complete_yield_varnames=(ACTION CAND INSERT DATA PREFIX_LEN)
 cand_count=0
 ble_seen=()
+ble_inserted=()
+ble_prefix_lens=()
 function ble/complete/cand/yield.initialize { :; }
-function ble/complete/cand/yield { ble_seen+=("$2|$3"); cand_count=$((cand_count+1)); }
+function ble/complete/cand/yield {
+  ble_seen+=("$2|$3")
+  local prefix_len=0
+  [[ "$2" == "$COMP_PREFIX"* ]] && prefix_len=${#COMP_PREFIX}
+  ble_prefix_lens+=("$prefix_len")
+  ble_inserted+=("${2:prefix_len}")
+  cand_count=$((cand_count+1))
+}
+contains_ble() { local x; for x in "${ble_inserted[@]}"; do [[ "$x" == "$1" ]] && return 0; done; return 1; }
+reset_ble() { ble_seen=(); ble_inserted=(); ble_prefix_lens=(); cand_count=0; }
+ble_zero_prefix() { local n; for n in "${ble_prefix_lens[@]}"; do [[ "$n" == 0 ]] || return 1; done; }
+reset_ble
 complete_words gryps kap
 if [[ ${COMPREPLY[*]} == '' && ${ble_seen[*]} == *'kapus|'*'git blame'* ]]; then ok 'ble.sh: osobno kandydat i opis zakończony Git'; else fail 'ble.sh: osobno kandydat i opis zakończony Git'; fi
+if contains_ble kapus && ble_zero_prefix; then ok 'ble.sh: kap<TAB> wstawia pełne kapus'; else fail 'ble.sh: kap<TAB> wstawia pełne kapus'; fi
+reset_ble
+complete_words gryps wy
+if contains_ble wywozka && ble_zero_prefix; then ok 'ble.sh: wy<TAB> wstawia wywozka, nie wozka'; else fail 'ble.sh: wy<TAB> wstawia wywozka, nie wozka'; fi
+reset_ble
+complete_words gryps prz
+expect 'ble.sh: prz<TAB> wstawia przerzutka' contains_ble przerzutka
+reset_ble
+complete_words gryps --cicho wy
+expect 'ble.sh: --cicho wy<TAB> wstawia wywozka' contains_ble wywozka
+reset_ble
+complete_words gryps kmina wy
+expect 'ble.sh: kmina wy<TAB> wstawia wywozka' contains_ble wywozka
+reset_ble
+complete_words gryps ''
+if contains_ble wywozka && ble_zero_prefix; then ok 'ble.sh: pusty prefiks daje całe nazwy'; else fail 'ble.sh: pusty prefiks daje całe nazwy'; fi
+reset_ble
+complete_words gryps wyv
+if (( ${#ble_inserted[@]} == 0 )); then ok 'ble.sh: brak fałszywych kandydatów'; else fail 'ble.sh: brak fałszywych kandydatów'; fi
 unset cand_count
 unset -f 'ble/complete/cand/yield.initialize' 'ble/complete/cand/yield'
 # Catalog guarantees stable, unique names with last field = Git translation (except help/alias).

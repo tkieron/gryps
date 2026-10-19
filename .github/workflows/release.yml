@@ -30,8 +30,8 @@ jobs:
       - name: Notatki z CHANGELOG
         run: |
           awk -v v="$(cat VERSION)" '
-            $0 ~ "^## \\[" v "\\]" {f=1; next}
-            /^## \[/ && f {exit}
+            $0 ~ "^## \[?" v "(\]|[[:space:]])" {f=1; next}
+            /^## / && f {exit}
             f' CHANGELOG.md > notes.md
           cat notes.md
 

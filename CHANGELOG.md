@@ -1,3 +1,17 @@
+## 1.3.5 — Uczciwa wywózka (2026-10-19)
+
+- `wywozka` i `kopsnij`: rozróżnienie push z nowymi commitami od `Everything up-to-date`.
+- Gdy staging zawiera nieprzyklepane zmiany, GRYPS sugeruje commit zamiast udawać sukces.
+- Bez staged: wskazówki dla zmian unstaged i nowych plików, osobna informacja dla czystego repo.
+- Jeśli są gotowe commity, push odbywa się normalnie, z ostrzeżeniem o niewysłanym stagingu.
+- Zachowane kody wyjścia i surowe wyjście Git w skryptach/`--cicho`.
+
+## 1.3.4 — Poprawka TAB w ble.sh (2026-10-19)
+
+- Naprawiono podpowiadanie częściowo wpisanych grypsów w ble.sh: `gryps wy<TAB>` wstawia teraz `wywozka`, nie `wozka`.
+- Zachowano pełne nazwy, opisy i pionowe grupowanie; bez zmian w działaniu komend Git.
+- Dodano testy regresyjne ble.sh dla prefiksów, aliasów i opcji `--cicho`.
+
 ## 1.3.3 — Smart TAB pionowo (2026-10-17)
 
 - Bash: `-o nosort` zachowuje kolejność grup; opcjonalny Readline `completion-display-width 0` wyświetla pozycje pojedynczo.

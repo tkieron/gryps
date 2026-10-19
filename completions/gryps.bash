@@ -1,4 +1,4 @@
-# GRYPS 1.3.3 — TAB: Bash 3.2+, ble.sh 0.4+ (optional)
+# GRYPS 1.3.4 — TAB: Bash 3.2+, ble.sh 0.4+ (optional)
 # Trzymamy czyste wartości COMPREPLY w zwykłym Bashu. Nie dopisujemy opisów
 # do nazw kandydatów, ponieważ TAB wstawiłby opis zamiast samej komendy.
 # W ble.sh, jeśli dostępne jest jego API kandydatów, przekazujemy osobny opis.
@@ -66,7 +66,11 @@ _gryps_candidates() {
        declare -F 'ble/complete/cand/yield' >/dev/null 2>&1 &&
        declare -F 'ble/complete/cand/yield.initialize' >/dev/null 2>&1; then
         ble_mode=1
-        local COMP_PREFIX="$cur"
+        # ble.sh: COMP_PREFIX oznacza fragment do odjęcia od kandydata
+        # (np. prefiks ścieżki), a nie już wpisane znaki aktualnego słowa.
+        # Dla nazw grypsów kandydat jest PEŁNĄ nazwą; nie wolno odcinać "wy"
+        # od "wywozka" ani "kap" od "kapus".
+        local COMP_PREFIX=''
         local "${_ble_complete_yield_varnames[@]/%/=}"
         ble/complete/cand/yield.initialize word
     fi
