@@ -35,7 +35,11 @@ run_tty wywozka
 contains 'staged = najpierw przyklep' 'Najpierw: gryps przyklep'
 contains 'staged = Salomon' 'Z pustego i Salomon nie naleje'
 not_contains 'staged nie ogłasza sukcesu' 'Wywózka zakończona'
-[ "$(git --git-dir="$WORK/remote.git" rev-parse refs/heads/main)" = "$(git rev-parse HEAD)" ] && ok 'nie wysłano nieprzyklepanych zmian' || bad 'nie wysłano nieprzyklepanych zmian'
+if [ "$(git --git-dir="$WORK/remote.git" rev-parse refs/heads/main)" = "$(git rev-parse HEAD)" ]; then
+    ok 'nie wysłano nieprzyklepanych zmian'
+else
+    bad 'nie wysłano nieprzyklepanych zmian'
+fi
 git reset -q -- staged.txt; rm staged.txt
 printf unstaged >> base.txt
 run_tty wywozka
@@ -49,8 +53,16 @@ printf next > notready.txt; git add notready.txt
 run_tty wywozka
 contains 'gotowy commit -> sukces' 'Wywózka zakończona'
 contains 'staged obok wypchniętego commita -> ostrzeżenie' 'wysłane są tylko wcześniejsze'
-[ "$(git --git-dir="$WORK/remote.git" rev-parse refs/heads/main)" = "$(git rev-parse HEAD)" ] && ok 'wysłano gotowy commit' || bad 'wysłano gotowy commit'
-[ -n "$(git diff --cached --name-only)" ] && ok 'staging nie został naruszony' || bad 'staging nie został naruszony'
+if [ "$(git --git-dir="$WORK/remote.git" rev-parse refs/heads/main)" = "$(git rev-parse HEAD)" ]; then
+    ok 'wysłano gotowy commit'
+else
+    bad 'wysłano gotowy commit'
+fi
+if [ -n "$(git diff --cached --name-only)" ]; then
+    ok 'staging nie został naruszony'
+else
+    bad 'staging nie został naruszony'
+fi
 run_tty kopsnij
 contains 'alias kopsnij ma te same reguły' 'Najpierw: gryps przyklep'
 OUT="$("$GRYPS" --cicho wywozka 2>&1)"

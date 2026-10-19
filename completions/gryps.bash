@@ -21,6 +21,10 @@ _gryps_meta() {
         kwity) REPLY='[📦 CODZIENNA ROBOTA] Wyciągnij dowody zmian — git diff + git diff --cached' ;;
         skitrac) REPLY='[📦 CODZIENNA ROBOTA] Schowaj fanty do indeksu — git add [-A]' ;;
         odkitraj) REPLY='[📦 CODZIENNA ROBOTA] Wyjmij z indeksu, nie z dysku — git restore --staged' ;;
+        ksywa) REPLY='[🪪 KARTOTEKA] Ustaw ksywę autora — git config user.name' ;;
+        meta) REPLY='[🪪 KARTOTEKA] Ustaw metę autora — git config user.email' ;;
+        meldunek) REPLY='[🪪 KARTOTEKA] Zameldowanie w dwóch ruchach — git config user.*' ;;
+        kartoteka) REPLY='[🪪 KARTOTEKA] Kto i skąd? — git config --show-origin' ;;
         przyklep) REPLY='[📦 CODZIENNA ROBOTA] Podpisz się pod robotą — git commit' ;;
         wywozka) REPLY='[📦 CODZIENNA ROBOTA] Wyślij urobek na wolkę — git push' ;;
         rakowiec) REPLY='[📦 CODZIENNA ROBOTA] Odbierz paczkę bez merge — git pull --ff-only' ;;
@@ -55,7 +59,7 @@ _gryps_meta() {
     esac
 }
 
-_gryps_words='mury jumaj lipo kwity skitrac odkitraj przyklep wywozka rakowiec ucho celka przerzutka spacer blaty uklady kapus wizjer bialko cynk dziara dziupla wyjmij spis spusc kasacja odkrec kipisz pomoc kmina bajera podpowiedzi wersja kopsnij rakieta stojka zblatuj'
+_gryps_words='mury jumaj lipo kwity skitrac odkitraj przyklep ksywa meta meldunek kartoteka wywozka rakowiec ucho celka przerzutka spacer blaty uklady kapus wizjer bialko cynk dziara dziupla wyjmij spis spusc kasacja odkrec kipisz pomoc kmina bajera podpowiedzi wersja kopsnij rakieta stojka zblatuj'
 
 _gryps_candidates() {
     # Komendy są podawane w kolejności grup i NIE są wykonywane.
@@ -70,6 +74,8 @@ _gryps_candidates() {
         # (np. prefiks ścieżki), a nie już wpisane znaki aktualnego słowa.
         # Dla nazw grypsów kandydat jest PEŁNĄ nazwą; nie wolno odcinać "wy"
         # od "wywozka" ani "kap" od "kapus".
+        # ble.sh odczytuje COMP_PREFIX dynamicznie
+        # shellcheck disable=SC2034
         local COMP_PREFIX=''
         local "${_ble_complete_yield_varnames[@]/%/=}"
         ble/complete/cand/yield.initialize word
@@ -101,6 +107,8 @@ _gryps_completions() {
     case "$cmd" in
         kmina)
             _gryps_candidates "$cur" ;;
+        ksywa|meta|meldunek)
+            _gryps_collect_completions < <(compgen -W '--global --local' -- "$cur") ;;
         kapus|skitrac|odkrec|odkitraj|kwity|spacer)
             if [[ "$cmd" == kapus && "$prev" == -L ]]; then return 0; fi
             _gryps_collect_completions < <(compgen -f -- "$cur") ;;
@@ -126,4 +134,8 @@ _gryps_completions() {
 # Format "jedna nazwa na wiersz" można włączyć przez:
 #   bind 'set completion-display-width 0'
 # (dotyczy globalnie terminala i nie dodaje opisów w zwykłym Bashu).
-complete -o filenames -o nosort -F _gryps_completions gryps
+# Bash 3.2 (systemowy macOS) nie zna flagi -o nosort. Próba rejestracji
+# z nieobsługiwaną flagą usuwa całą definicję TAB, więc potrzebny fallback.
+if ! complete -o filenames -o nosort -F _gryps_completions gryps 2>/dev/null; then
+    complete -o filenames -F _gryps_completions gryps
+fi

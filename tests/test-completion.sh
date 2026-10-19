@@ -13,7 +13,8 @@ printf 'example\n' > 'ts z odstępem.txt'
 printf 'example\n' > '--ts-leading.txt'
 
 # Completion definition is normally sourced by bash-completion.
-# shellcheck source=../completions/gryps.bash
+# completion jest osobno lintowane
+# shellcheck source=/dev/null
 source "$ROOT/completions/gryps.bash"
 
 PASS=0 FAIL=0
@@ -56,6 +57,26 @@ if [[ "$(complete -p gryps)" == *'-o filenames'* ]]; then
     PASS=$((PASS + 1))
 else
     printf '  ❌ Brakuje opcji -o filenames\n'
+    FAIL=$((FAIL + 1))
+fi
+
+# Emulacja rejestracji pod macOS Bash 3.2 (brak -o nosort).
+if (
+    complete() {
+        case " $* " in
+            *' -o nosort '*) return 2 ;;
+        esac
+        builtin complete "$@"
+    }
+    # shellcheck source=/dev/null
+    source "$ROOT/completions/gryps.bash"
+    spec="$(builtin complete -p gryps)"
+    [[ "$spec" == *'-o filenames'* && "$spec" != *'-o nosort'* ]]
+); then
+    printf '  ✅ macOS Bash 3.2: podpowiedzi z -o filenames bez nosort\n'
+    PASS=$((PASS + 1))
+else
+    printf '  ❌ macOS Bash 3.2: nie działa fallback rejestracji TAB\n'
     FAIL=$((FAIL + 1))
 fi
 

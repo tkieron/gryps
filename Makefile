@@ -52,9 +52,10 @@ test: build
 	$(TEST_BASH) tests/test-completion.sh
 	$(TEST_BASH) tests/test-smart-tab.sh
 	$(TEST_BASH) tests/test-push-feedback.sh
+	$(TEST_BASH) tests/test-identity.sh
 
 lint:
-	shellcheck -s bash bin/gryps completions/gryps.bash packaging/build-deb.sh tests/run.sh tests/test-v13.sh tests/test-completion.sh tests/test-smart-tab.sh tests/test-push-feedback.sh
+	shellcheck -s bash bin/gryps completions/gryps.bash packaging/build-deb.sh tests/run.sh tests/test-v13.sh tests/test-completion.sh tests/test-smart-tab.sh tests/test-push-feedback.sh tests/test-identity.sh
 	shellcheck -s sh packaging/macos/*.sh
 
 deb:

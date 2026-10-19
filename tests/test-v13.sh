@@ -22,6 +22,8 @@ repo() { cd "$WORK" || exit 1; mkdir -p "$1"; cd "$1" || exit 1; git init -q; ec
 
 printf '▶ Bezpieczne wyjście, tryby maszynowe, słownik\n'
 run kwty; assert 'nieznany gryps zwraca błąd' nonzero; assert 'podpowiedź przy literówce' contains 'gryps kwity'
+# literalny payload do testu injection
+# shellcheck disable=SC2016
 run '$(touch /tmp/NO-SUCH-FILE)'; assert 'nazwa nie uruchamia shell' nonzero
 run --cicho pomoc; assert '--cicho przed komendą działa' zero
 run kmina kwity; assert 'kmina kwity istnieje' contains 'git diff'

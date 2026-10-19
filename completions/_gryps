@@ -4,7 +4,7 @@
 # oraz zstyle ':completion:*:descriptions' format '%B%d%b'
 
 local -a gryps_branches gryps_remote gryps_commits gryps_tags gryps_stashes
-local -a gryps_robota gryps_cele gryps_dochodzenie gryps_dziupla gryps_ratunek gryps_pomoc gryps_aliasy
+local -a gryps_kartoteka gryps_robota gryps_cele gryps_dochodzenie gryps_dziupla gryps_ratunek gryps_pomoc gryps_aliasy
 gryps_robota=(
     'mury:Postaw nową celę — git init'
     'jumaj:Zwiń repo z wolki — git clone'
@@ -16,6 +16,12 @@ gryps_robota=(
     'wywozka:Wyślij urobek na wolkę — git push'
     'rakowiec:Odbierz paczkę bez merge — git pull --ff-only'
     'ucho:Posłuchaj co na serwerze — git fetch'
+)
+gryps_kartoteka=(
+    'ksywa:Ustal ksywę autora — git config user.name'
+    'meta:Ustal metę autora — git config user.email'
+    'meldunek:Zameldowanie naraz — git config user.name + user.email'
+    'kartoteka:Sprawdź papiery i ich źródła — git config --show-origin'
 )
 gryps_cele=(
     'celka:Lista cel i nowe cele — git branch'
@@ -75,6 +81,7 @@ _gryps_line_group() {
 _gryps_all_groups() {
     local ret=1
     _gryps_line_group gryps-robota '📦 CODZIENNA ROBOTA' "${gryps_robota[@]}" && ret=0
+    _gryps_line_group gryps-kartoteka '🪪 KARTOTEKA' "${gryps_kartoteka[@]}" && ret=0
     _gryps_line_group gryps-cele '🚪 CELE I UKŁADY' "${gryps_cele[@]}" && ret=0
     _gryps_line_group gryps-dochodzenie '🕵️ DOCHODZENIE' "${gryps_dochodzenie[@]}" && ret=0
     _gryps_line_group gryps-dziupla '🕳️ DZIUPLA' "${gryps_dziupla[@]}" && ret=0
@@ -93,6 +100,13 @@ fi
 
 case "${words[gryps_cmd_index]}" in
     kmina) _gryps_all_groups ;;
+    ksywa|meta|meldunek)
+        local -a gryps_identity_scope
+        gryps_identity_scope=(
+            '--global:Zapis dla wszystkich repozytoriów'
+            '--local:Zapis tylko dla tego repozytorium'
+        )
+        _describe -t gryps-identity-scope '🪪 Zasięg konfiguracji' gryps_identity_scope ;;
     kapus|skitrac|odkrec|odkitraj|kwity|spacer|jumaj)
         # Prawdziwe pliki, także po `--` i po opcjach takich jak `-L`.
         _files ;;

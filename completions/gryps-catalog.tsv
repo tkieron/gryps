@@ -6,6 +6,10 @@ robota|kwity|Wyciągnij dowody zmian|git diff + git diff --cached
 robota|skitrac|Schowaj fanty do indeksu|git add [-A]
 robota|odkitraj|Wyjmij z indeksu, nie z dysku|git restore --staged
 robota|przyklep|Podpisz się pod robotą|git commit
+kartoteka|ksywa|Ustal ksywę autora|git config user.name
+kartoteka|meta|Ustal metę autora|git config user.email
+kartoteka|meldunek|Zameldowanie naraz|git config user.name + user.email
+kartoteka|kartoteka|Sprawdź papiery i ich źródła|git config --show-origin
 robota|wywozka|Wyślij urobek na wolkę|git push
 robota|rakowiec|Odbierz paczkę bez merge|git pull --ff-only
 robota|ucho|Posłuchaj co na serwerze|git fetch

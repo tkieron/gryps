@@ -198,3 +198,19 @@ Globalna opcja przed komenda wylacza komentarze grypsowe, ale zachowuje dane Git
 .PP
 Dziupla bez argumentow ukrywa takze niesledzone pliki (-u), ale nie ignorowane.
 Rakowiec bez wskazanej strategii pull uzywa --ff-only.
+
+.SH GRYPS 1.4.0 — KARTOTEKA GRYPSUJĄCEGO
+.TP
+.BR ksywa " [--global] [nazwa]"
+Odczytuje lub ustawia user.name; zapis domyślnie lokalny dla repozytorium.
+.TP
+.BR meta " [--global] [email]"
+Odczytuje lub ustawia user.email; zapis domyślnie lokalny dla repozytorium.
+.TP
+.BR meldunek " [--global] [nazwa email]"
+Ustawia oba pola. Bez parametrów pyta interaktywnie, poza TTY wymaga dwóch wartości.
+.TP
+.B kartoteka
+Pokazuje efektywne dane Git i zakres ich pochodzenia.
+.PP
+Przy braku tożsamości git commit, gryps przyklep wskazuje ksywa/meta/meldunek.

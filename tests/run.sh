@@ -75,6 +75,8 @@ run przyklep "Feat z flagą" --no-verify
 expect_code 0 "przyklep opis --no-verify omija hook"
 check '[ "$(git log -1 --format=%s)" = "Feat z flagą" ]' "flaga po opisie nie trafia do commita"
 rm -f .git/hooks/pre-commit
+# wykorzystywane dynamicznie przez check()/eval
+# shellcheck disable=SC2034
 OLD_COUNT=$(git rev-list --count HEAD)
 run przyklep "Feat po poprawce" --amend
 expect_code 0 "przyklep opis --amend"

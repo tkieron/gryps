@@ -1,3 +1,18 @@
+## [1.4.0] — Kartoteka grypsującego (2026-10-19)
+
+- Nowe `ksywa`, `meta`, `meldunek`, `kartoteka`: lokalna tożsamość domyślnie, `--global` wyłącznie na żądanie.
+- `przyklep` wykrywa brak działającej tożsamości Git i podpowiada konfigurowanie ksywy i mety.
+- Interaktywny meldunek, brak pytań w nieterminalowych skryptach, diagnostyka błędów i komunikaty więzienne.
+- Podpowiedzi Bash/ble.sh i Zsh oraz testy tożsamości lokalnej, globalnej i źródeł konfiguracji.
+
+## 1.3.6 — Naprawa CI / ShellCheck i macOS Bash 3.2 (2026-10-19)
+
+- Usunięto błędne `else if` w `odkitraj` (SC1075) bez zmiany semantyki komendy.
+- Usunięto nieużywany kolor `GREEN`; oznaczono intencjonalne użycia dynamiczne oraz literalne testowe ciągi dla ShellCheck.
+- Testy push korzystają z `if/else` zamiast skrótu `A && B || C`.
+- Bash TAB wykrywa brak `complete -o nosort` i na macOS Bash 3.2 rejestruje podpowiedzi z `-o filenames`.
+- Nowy test regresyjny emuluje Bash 3.2 i weryfikuje działanie fallbacku TAB.
+
 ## 1.3.5 — Uczciwa wywózka (2026-10-19)
 
 - `wywozka` i `kopsnij`: rozróżnienie push z nowymi commitami od `Everything up-to-date`.

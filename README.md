@@ -39,6 +39,20 @@ gryps odkitraj -- src/<TAB>
 
 Po aktualizacji pakietu uruchom nowy terminal, żeby załadować aktualne skrypty podpowiedzi. Na Linuxie z Bash można też odświeżyć je w istniejącej sesji: `source /usr/share/bash-completion/completions/gryps` (instalacja `.deb`), ewentualnie odpowiedni plik z katalogu `~/.local/share/bash-completion/completions/`.
 
+## GRYPS 1.4.0 — Kartoteka grypsującego 🪪
+
+Zarządzanie danymi Git autora commita (domyślnie **tylko bieżące repo**):
+
+```bash
+gryps ksywa "Twoja Ksywa"          # git config --local user.name
+gryps meta "ty@example.com"          # git config --local user.email
+gryps meldunek "Twoja Ksywa" "ty@example.com"
+gryps kartoteka                      # efektywne wartości i ich źródła
+gryps meldunek --global "Twoja Ksywa" "ty@example.com"
+```
+
+Bez wartości `ksywa` i `meta` pokazują aktualne ustawienie; `meldunek` bez argumentów pyta interaktywnie (bez terminala wymaga obu wartości). `--global` musi być jawne. Nieudanego commita GRYPS nie ponawia automatycznie. Jeśli Git nie potrafi ustalić tożsamości autora/commitera, `przyklep` podpowiada `meldunek` zamiast wyświetlać ogólny błąd.
+
 ## GRYPS 1.3.3 — podpowiedzi TAB
 
 `gryps podpowiedzi` pokazuje pogrupowany słownik z odpowiednikami Git.
