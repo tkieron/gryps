@@ -2,7 +2,7 @@
 # Offline, per-user installer for Gryps on macOS (works on Linux too).
 set -eu
 
-BASE_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd)
+BASE_DIR=$(CDPATH="" cd "$(dirname "$0")" && pwd)
 PREFIX=${PREFIX:-"$HOME/.local"}
 CONFIGURE_ZSH=no
 
@@ -56,6 +56,7 @@ if [ "$CONFIGURE_ZSH" = yes ]; then
     if [ -f "$RC" ] && grep -Fq "$MARK" "$RC"; then
         echo "Konfiguracja istnieje już w $RC (bez zmian)."
     else
+        # shellcheck disable=SC2016 # literalne $HOME/$PATH zapisywane do pliku rc
         {
             printf '\n%s\n' "$MARK"
             printf '%s\n' 'export PATH="$HOME/.local/bin:$PATH"'

@@ -45,7 +45,9 @@ run meta 'test@example.com'; expect 'lokalna meta' zero
 expect 'meta w repo' is "$(git config --local --get user.email)" test@example.com
 expect 'globalna meta nietknięta' is "$(git config --global --get user.email || true)" ''
 run przyklep 'Pierwszy commit'; expect 'commit po meldunku działa' zero
-expect 'commit ma lokalną tożsamość' is "$(git show -s --format='%an <%ae>' HEAD)" 'Tomasz K. <test@example.com>'
+# Git < 2.42 (np. Apple Git na macOS 14) obcina końcową kropkę z nazwy autora.
+AUTHOR="$(git show -s --format='%an <%ae>' HEAD)"
+expect 'commit ma lokalną tożsamość' is "${AUTHOR/#Tomasz K. </Tomasz K <}" 'Tomasz K <test@example.com>'
 run kartoteka; expect 'kartoteka czyta konfigurację' contains '[LOCAL]'
 printf '▶ Global i precedence\n'
 run meldunek --global 'Global G.' global@example.org
