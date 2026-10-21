@@ -19,7 +19,7 @@ git config --global core.editor true
 PASS=0 FAIL=0 SKIP=0 OUT='' ERR='' CODE=0
 ok() { PASS=$((PASS+1)); printf '  ✅ %s\n' "$1"; }
 bad() { FAIL=$((FAIL+1)); printf '  ❌ %s\n' "$1"; printf 'kod=%s\n%s\n' "$CODE" "$OUT" | head -12 | sed 's/^/    /'; }
-skip() { SKIP=$((SKIP+1)); printf '  ⏭️  SKIP %s\n' "$1"; }
+skip() { SKIP=$((SKIP+1)); printf '  ⏭️  SKIP %s: brak zgodnego util-linux script (interakcję Windows zweryfikuj ręcznie)\n' "$1"; }
 expect() { local name="$1"; shift; if "$@"; then ok "$name"; else bad "$name"; fi; }
 # OUT = stdout+stderr; bez terminala na wejściu.
 run() { OUT="$("$GRYPS" "$@" 2>&1 < /dev/null)"; CODE=$?; }
@@ -511,9 +511,10 @@ done < <(grep -o '](\([^)#:]*\))' "$README" | sed 's/^](//; s/)$//')
 expect 'T95 lokalne linki README istnieją' is "$broken" ''
 expect 'T110 README opisuje migrację skitrac -> skitraj' grep -q 'skitrac.*skitraj' "$README"
 expect 'T110 CHANGELOG opisuje migrację' grep -q 'skitrac.*skitraj' "$CL"
-expect 'T102 VERSION = 1.4.1' is "$(cat "$ROOT/VERSION")" 1.4.1
+RELEASE_VERSION=$(cat "$ROOT/VERSION")
+expect 'T102 VERSION ma format wydania' grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' "$ROOT/VERSION"
 run wersja
-expect 'T102 gryps wersja = 1.4.1' is "$OUT" 'Gryps wersja 1.4.1'
+expect 'T102 gryps wersja zgodna z VERSION' is "$OUT" "Gryps wersja $RELEASE_VERSION"
 expect 'T102 SDD w repo' exists "$ROOT/docs/GRYPS_v1.4.1_SDD.md"
 
 printf '▶ Etap C — skitraj (zmiana nazwy)\n'

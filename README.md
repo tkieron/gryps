@@ -127,6 +127,12 @@ Globalna opcja `gryps --cicho <komenda>` (albo `GRYPS_CICHO=1`) wyłącza grypso
 
 ## Co nowego? / Historia zmian
 
+### v1.5.0 — Gryps przekracza granice 🪟🚬
+- Paczka Windows Git Bash: instalacja per user, offline, bez WSL i administratora do GRYPS.
+- Bezpieczna konfiguracja PATH/TAB za zgodą, backup `.bashrc`, reinstalacja i dezinstalator.
+- Natywny job Windows i kontrola kompletu paczek przed publikacją release.
+- Oddzielna instrukcja WSL2/Ubuntu; wspólny silnik Bash pozostaje bez zmian.
+
 ### v1.4.1 — Ratunek bez kipiszu
 - Nowe grypsy: `odklep` (`git reset --soft`), `wykipruj` (`git clean -d`), `tabor` (`git rebase`), `podkopsaj` (`git cherry-pick`).
 - **Zmiana niekompatybilna:** `skitrac` → `skitraj` (`git add`), bez aliasu. `gryps skitrac` kończy się błędem i niczego nie dodaje do stagingu, tylko podpowiada nową nazwę. W skryptach zamień `gryps skitrac` na `gryps skitraj` — argumenty i działanie są identyczne.
@@ -154,14 +160,64 @@ sudo apt install ./gryps_*_all.deb
 **macOS (Intel i Apple Silicon)** — pobierz z wydania paczkę `gryps-<wersja>-macos.zip` (Finder) lub `.tar.gz`. Bez Homebrew i bez `sudo`, dla domyślnego Zsh i systemowego Bash 3.2:
 
 ```sh
-tar -xzf gryps-1.4.1-macos.tar.gz
-cd gryps-1.4.1-macos
+tar -xzf gryps-1.5.0-macos.tar.gz
+cd gryps-1.5.0-macos
 ./install.sh --configure-zsh
 # otwórz nowy Terminal
 gryps wersja
 ```
 
 Instrukcja i dezinstalator: [packaging/macos/README-macOS.md](packaging/macos/README-macOS.md). Instalacja trafia do `~/.local`. Potrzebny jest Git (na macOS wystarczą Command Line Tools).
+
+### Windows (Git Bash — zalecane)
+
+Git Bash **nie wymaga WSL**. Wystarczy [Git for Windows](https://gitforwindows.org/).
+GRYPS instaluje się w Twoim HOME, bez `sudo` i bez administratora.
+
+1. Zainstaluj Git for Windows i otwórz **Git Bash**.
+2. Pobierz `gryps-1.5.0-windows-gitbash.zip` z [wydania v1.5.0](https://github.com/tkieron/gryps/releases/tag/v1.5.0).
+3. Rozpakuj ZIP i otwórz Git Bash w folderze `gryps-1.5.0-windows-gitbash`.
+4. Wykonaj `sh ./install.sh` i zdecyduj, czy dodać PATH/TAB do `.bashrc`.
+5. Otwórz nowy Git Bash i sprawdź:
+
+```bash
+gryps wersja       # Gryps wersja 1.5.0
+gryps podpowiedzi
+gryps lipo         # wewnątrz repo
+```
+
+Automatycznie: `sh ./install.sh --yes`; same pliki: `sh ./install.sh --no-config`.
+Bez TTY domyślnie brak pytań i zmian konfiguracji. Opcjonalne dodatki TAB
+wymagają odrębnej decyzji; instalator nie pobiera ble.sh.
+Dezinstalacja z zachowanej paczki: `sh ./uninstall.sh`.
+
+`command not found`: sprawdź `echo "$PATH"`, `type -a gryps`, `~/.bashrc`
+i jej ładowanie przez `~/.bash_profile`. Nie używaj `.deb` w Git Bash.
+Szczegóły PREFIX, backupów, TTY, spacji i ustawień Git:
+[instrukcja Windows](packaging/windows/README-Windows.md).
+W środowisku firmowym przestrzegaj polityki dotyczącej Git i skryptów.
+
+### Windows (WSL2 — alternatywa)
+
+WSL2 uruchamia wersję Linux. W Windows 10/11 z uprawnieniami do włączenia WSL
+uruchom PowerShell **jako administrator** i wykonaj `wsl --install -d Ubuntu`;
+może być potrzebny restart. Dla istniejącej instalacji sprawdź `wsl -l -v`.
+To systemowa instalacja WSL zgodna z [instrukcją Microsoft](https://learn.microsoft.com/windows/wsl/install).
+
+Dalej pracuj w terminalu **Ubuntu**, nie w Git Bash ani PowerShell:
+
+```bash
+sudo apt update && sudo apt install -y git bash
+# pobierz .deb z wydania v1.5.0 do Ubuntu
+sudo apt install ./gryps_1.5.0-1_all.deb
+gryps wersja
+gryps pomoc
+gryps lipo         # wewnątrz repo
+```
+
+Preferuj repo w Linuxowym `~/workspace/` zamiast `/mnt/c`.
+WSL ma własne ustawienia Git; w razie potrzeby wykonaj `gryps meldunek` w repo w Ubuntu.
+Pełne wymagania, instalacja i diagnostyka: [INSTALL-WSL](docs/INSTALL-WSL.md).
 
 **Jeden plik, bez roota** (bez podpowiedzi TAB i `man`):
 
@@ -175,6 +231,7 @@ chmod +x ~/.local/bin/gryps
 
 ```bash
 git clone https://github.com/tkieron/gryps.git && cd gryps
+make windows                     # opcjonalnie: budowa ZIP Git Bash (zip wymagane tylko do budowy)
 make install PREFIX=~/.local     # albo: sudo make install (do /usr/local)
 sh install.sh                    # albo: instalator do ~/.local z konfiguracją TAB w ~/.bashrc / ~/.zshrc
 ```

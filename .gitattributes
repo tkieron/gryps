@@ -1,0 +1,6 @@
+# Shell artifacts must be executable by Git Bash even when core.autocrlf=true.
+/bin/gryps text eol=lf
+*.sh text eol=lf
+/completions/* text eol=lf
+/VERSION text eol=lf
+/Makefile text eol=lf

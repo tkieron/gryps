@@ -15,7 +15,7 @@ bad() { echo "  ❌ $1"; printf '%s\n' "$OUT" | tail -8; FAIL=$((FAIL+1)); }
 contains() { if [[ "$OUT" == *"$2"* ]]; then ok "$1"; else bad "$1"; fi; }
 not_contains() { if [[ "$OUT" != *"$2"* ]]; then ok "$1"; else bad "$1"; fi; }
 if ! command -v script >/dev/null 2>&1 || ! script -q -e -c true /dev/null >/dev/null 2>&1; then
-    echo "Pomijam PTY (brak zgodnego util-linux script); zwykłe testy push działają w tests/run.sh"; exit 0
+    echo "SKIP: test-push-feedback PTY: brak zgodnego util-linux script; krytyczne Windows W10 wymaga dowodu w mintty/Windows Terminal"; exit 0
 fi
 mkdir "$WORK/work"; cd "$WORK/work" || exit 2
 git init -q --bare "$WORK/remote.git"

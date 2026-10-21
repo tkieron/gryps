@@ -10,7 +10,7 @@ mkdir -p "$STAGE/home"
 
 tar -xzf "$ARCHIVE" -C "$STAGE"
 PKG="$STAGE/gryps-$VERSION-macos"
-[[ "$($PKG/bin/gryps wersja)" == *"$VERSION"* ]]
+[[ "$("$PKG/bin/gryps" wersja)" == *"$VERSION"* ]]
 [[ -f "$PKG/share/zsh/site-functions/_gryps" ]]
 [[ -f "$PKG/share/bash-completion/completions/gryps" ]]
 

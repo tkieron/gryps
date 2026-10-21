@@ -17,20 +17,12 @@ ZSHDIR  := $(PREFIX)/share/zsh/site-functions
 MANDIR  := $(PREFIX)/share/man/man1
 DOCDIR  := $(PREFIX)/share/doc/gryps
 
-.PHONY: all build install uninstall test lint deb macos demo promo skit clean
+.PHONY: all build install uninstall test lint deb macos windows test-windows test-windows-package demo promo skit clean
 
 all: build
 
-build: dist/gryps dist/gryps.1
-
-dist/gryps: bin/gryps VERSION
-	@mkdir -p dist
-	sed 's/__VERSION__/$(VERSION)/g' bin/gryps > $@
-	chmod 0755 $@
-
-dist/gryps.1: man/gryps.1 VERSION
-	@mkdir -p dist
-	sed 's/__VERSION__/$(VERSION)/g' man/gryps.1 > $@
+build:
+	VERSION="$(VERSION)" sh packaging/build.sh
 
 install: build
 	install -d $(DESTDIR)$(BINDIR) $(DESTDIR)$(COMPDIR) $(DESTDIR)$(ZSHDIR) $(DESTDIR)$(MANDIR) $(DESTDIR)$(DOCDIR)
@@ -47,18 +39,13 @@ uninstall:
 
 TEST_BASH ?= bash
 test: build
-	$(TEST_BASH) tests/run.sh
-	$(TEST_BASH) tests/test-v13.sh
-	$(TEST_BASH) tests/test-completion.sh
-	$(TEST_BASH) tests/test-smart-tab.sh
-	$(TEST_BASH) tests/test-push-feedback.sh
-	$(TEST_BASH) tests/test-identity.sh
-	$(TEST_BASH) tests/test-v141.sh
-	@if command -v zsh >/dev/null 2>&1; then zsh tests/test-zsh.zsh; else echo 'SKIP: brak zsh, pomijam tests/test-zsh.zsh'; fi
+	TEST_BASH="$(TEST_BASH)" $(TEST_BASH) tests/run-platform-tests.sh
+	$(TEST_BASH) tests/test-build.sh
+	$(TEST_BASH) tests/test-portability.sh
 
 lint:
-	shellcheck -s bash bin/gryps completions/gryps.bash packaging/build-deb.sh tests/run.sh tests/test-v13.sh tests/test-completion.sh tests/test-smart-tab.sh tests/test-push-feedback.sh tests/test-identity.sh tests/test-v141.sh
-	shellcheck -s sh packaging/macos/*.sh
+	shellcheck -s bash bin/gryps completions/gryps.bash packaging/build-deb.sh tests/*.sh
+	shellcheck -s sh packaging/macos/*.sh packaging/windows/*.sh packaging/build.sh packaging/verify-release.sh packaging/publish-release.sh
 
 deb:
 	bash packaging/build-deb.sh
@@ -66,6 +53,16 @@ deb:
 macos:
 	sh packaging/macos/build-macos.sh
 	bash tests/test-macos.sh
+
+windows: build
+	sh packaging/windows/build-gitbash.sh
+	$(TEST_BASH) tests/test-windows-package.sh
+
+test-windows-package: windows
+	$(TEST_BASH) tests/test-windows-install.sh
+
+test-windows: test-windows-package
+	$(TEST_BASH) tests/test-windows.sh
 
 demo: build
 	python3 docs/demo/render.py docs/demo.gif
