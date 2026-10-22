@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
@@ -25,21 +26,68 @@ jobs:
           /bin/bash --version | head -n 1
           PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH" make test TEST_BASH=/bin/bash
           make macos
-          for script in packaging/macos/*.sh; do sh -n "$script"; done
+          make test-windows-package TEST_BASH=/bin/bash
+          for script in packaging/macos/*.sh packaging/windows/*.sh; do sh -n "$script"; done
+          brew install shellcheck
+          make lint
 
-      - name: Testy Linux
+      - name: Testy Linux i przenośnej paczki Windows
         if: runner.os == 'Linux'
-        run: make test
+        run: |
+          make test
+          make test-windows-package
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'macOS'
+        with:
+          name: gryps-macos-${{ matrix.os }}
+          path: |
+            dist/*-macos.tar.gz
+            dist/*-macos.zip
+          if-no-files-found: error
+
+  windows:
+    name: Natywny Windows Git Bash
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Narzędzia archiwizujące wyłącznie do CI (bez make i PowerShell)
+        run: |
+          choco install zip unzip --yes --no-progress
+          command -v zip unzip
+          case "$(uname -s)" in MINGW*_NT-*|MSYS_NT-*) ;; *) exit 1 ;; esac
+          command -v bash git
+      - name: Wersjonowany build i wspólna semantyka
+        run: |
+          sh packaging/build.sh
+          bash tests/run-platform-tests.sh
+          bash tests/test-portability.sh
+      - name: ZIP, instalacja, reinstalacja, uninstall i natywne ścieżki
+        run: |
+          sh packaging/windows/build-gitbash.sh
+          bash tests/test-windows-package.sh
+          bash tests/test-windows-install.sh
+          bash tests/test-windows.sh
+          for script in packaging/windows/*.sh; do sh -n "$script"; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gryps-windows-gitbash
+          path: dist/*-windows-gitbash.zip
+          if-no-files-found: error
 
   lint:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y shellcheck
       - run: make lint
 
   deb:
-    name: Paczka .deb
+    name: Paczka .deb i kompletność wydania
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +99,16 @@ jobs:
           man -w gryps
           GRYPS="$(command -v gryps)" bash tests/run.sh
           GRYPS="$(command -v gryps)" bash tests/test-v13.sh
+      - name: Cross-build i negatywne testy release
+        run: |
+          make macos windows
+          sh packaging/verify-release.sh
+          bash tests/test-release-artifacts.sh
+          bash tests/test-release-publish.sh
       - uses: actions/upload-artifact@v4
         with:
           name: gryps-deb
-          path: dist/*.deb
+          path: |
+            dist/*.deb
+            dist/gryps
+          if-no-files-found: error

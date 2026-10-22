@@ -11,6 +11,7 @@ printf 'class Test {}\n' > src/tsTest.java
 printf 'example\n' > tsPrasa.txt
 printf 'example\n' > 'ts z odstępem.txt'
 printf 'example\n' > '--ts-leading.txt'
+printf 'Unicode\n' > 'ts Zażółć [1].txt'
 
 # Completion definition is normally sourced by bash-completion.
 # completion jest osobno lintowane
@@ -51,6 +52,8 @@ assert_reply 'skitraj -- ts<TAB>' 'tsPrasa.txt' gryps skitraj -- ts
 assert_reply 'skitraj -- src/ts<TAB>' 'src/tsTest.java' gryps skitraj -- src/ts
 assert_reply 'wykipruj -- ts<TAB>' 'tsPrasa.txt' gryps wykipruj -- ts
 assert_reply 'podpowiedź skitraj' 'skitraj' gryps ski
+assert_reply 'wy<TAB> zachowuje pełny prefiks' 'wywozka' gryps wy
+assert_reply 'kapus Unicode i nawiasy' 'ts Zażółć [1].txt' gryps kapus -- ts
 assert_reply 'podpowiedź nazwy grypsu' 'kapus' gryps kap
 assert_reply 'podpowiedź po --cicho' 'kapus' gryps --cicho kap
 assert_reply 'kmina kap<TAB>' 'kapus' gryps kmina kap

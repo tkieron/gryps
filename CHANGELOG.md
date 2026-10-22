@@ -1,3 +1,14 @@
+## [1.5.0] — Gryps przekracza granice 🪟🚬 (2026-10-21)
+
+- Oficjalna paczka `gryps-1.5.0-windows-gitbash.zip`: wersjonowany silnik Bash, completion i instalacja per user offline, bez WSL, sudo i PowerShell.
+- Instalator z `--yes`/`--no-config`, backupami `.bashrc`, jednym oznaczonym blokiem PATH/TAB, kontrolą własności plików i rollbackiem. Dezinstalator zachowuje pozostałe ustawienia oraz zmodyfikowane/obce pliki.
+- Wspólny proces budowania dla `make build` i natywnego Git Bash; `make windows`, `make test-windows-package`, `make test-windows` i reguły LF dla skryptów.
+- Windows CI używa Git for Windows, testuje wspólną semantykę, ZIP i instalację. Release czeka na Linux/macOS/Windows i lint, sprawdza wszystkie paczki, przesyła Assets do draftu i weryfikuje komplet przed publikacją.
+- README rozdziela zalecany Git Bash i alternatywny WSL2/Ubuntu; pełny słownik nadal nad historią zmian. Osobne instrukcje Windows, PATH/profili, CRLF/filemode i WSL2.
+- Zwykły TAB pozostaje bez zależności od ble.sh; instalator nie pobiera dodatków ani nie obiecuje zaawansowanego menu bez potwierdzenia zgodności.
+- Testy przenośności LF/CRLF, Unicode/spacji/nawiasów, trybu bez TTY i zachowania konfiguracji Git; regresja `wy<TAB>` oraz `kapus -- ts<TAB>`.
+- Stan rzeczywistych testów Windows/macOS/WSL2 i publikacji jest jawnie zapisany w `docs/GRYPS-1.5.0-ACCEPTANCE.md`; lokalny cross-build nie zastępuje akceptacji platformowej.
+
 ## [1.4.1] — Ratunek bez kipiszu (2026-10-19)
 
 ### Zmiana niekompatybilna
