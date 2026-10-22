@@ -4,12 +4,20 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GRYPS=${GRYPS:-$ROOT/dist/gryps}
 WORK=$(mktemp -d)
+# MSYS deliberately skips automatic argument conversion for [] (and other
+# glob characters). Native Git cannot resolve an unconverted /tmp path.
+# Normalize fixture paths once; Bash and Windows Git both accept C:/... .
+case "$(uname -s)" in
+    MINGW*_NT-*|MSYS_NT-*) WORK=$(cygpath -m "$WORK") ;;
+esac
 trap 'rm -rf "$WORK"' EXIT
+trap 'printf "FAIL test-portability.sh:%s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 export HOME="$WORK/home" GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null
 export GIT_TERMINAL_PROMPT=0 GIT_PAGER=cat PAGER=cat NO_COLOR=1
 mkdir -p "$HOME"
 # A path under the actual current drive on Windows, not a fabricated /c fixture.
 for autocrlf in false true; do
+    printf '▶ Portability: core.autocrlf=%s\n' "$autocrlf"
     REPO="$WORK/Ala Nowak Zażółć [1]/repo-$autocrlf"
     mkdir -p "$REPO/src"
     cd "$REPO"

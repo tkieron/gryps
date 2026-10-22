@@ -42,6 +42,7 @@ test: build
 	TEST_BASH="$(TEST_BASH)" $(TEST_BASH) tests/run-platform-tests.sh
 	$(TEST_BASH) tests/test-build.sh
 	$(TEST_BASH) tests/test-portability.sh
+	$(TEST_BASH) tests/test-portability-paths.sh
 
 lint:
 	shellcheck -s bash bin/gryps completions/gryps.bash packaging/build-deb.sh tests/*.sh

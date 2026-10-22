@@ -29,6 +29,30 @@ zostało zlecone z tego środowiska.
 | W15 | `docs/INSTALL-WSL.md`; cross-build i rozpakowanie DEB lokalnie | PENDING: wykonać instrukcję na rzeczywistym WSL2 |
 | W16 | `verify-release.sh`, `test-release-artifacts.sh`, `test-release-publish.sh` (gh stub) | PASS logiki/preflight; faktyczne Assets PENDING po decyzji o tagu |
 
+## CI 2026-10-22 i poprawka ścieżek testowych
+
+[Run 39727989552](https://github.com/tkieron/gryps/actions/runs/39727989552),
+commit `0dd5948a7c`: Linux (ubuntu-22.04/latest), macOS (14/latest), lint
+oraz job DEB/kompletności wydania zakończyły się sukcesem. Windows zaliczył
+wspólny zestaw semantyczny (w tym 298/298 asercji test-v141; 7 opcjonalnych
+przypadków PTY pominiętych), po czym `test-portability.sh` zakończył się
+`fatal: Invalid path '/tmp'` i kodem 128. Pakowanie/instalacja Windows
+w tym runie nie zostały uruchomione.
+
+Źródłem błędu jest granica MSYS/native Git: automatyczna konwersja nie
+obejmuje absolutnych argumentów POSIX zawierających nawiasy `[]`.
+Fixture ma celowo takie nazwy, więc teraz normalizuje swój katalog
+przez `cygpath -m` na Windows, zachowując wszystkie nietypowe znaki.
+Launcher Windows przekazuje również jawnie przekonwertowane ścieżki archiwum
+i katalogu do natywnego unzip; tę granicę obejmuje osobna regresja.
+Nie zmieniono silnika GRYPS ani konwersji dowolnych argumentów użytkownika.
+
+Regresja `tests/test-portability-paths.sh` odtwarza tę granicę na Linux,
+przekazując pozostałe operacje prawdziwemu Gitowi: przed poprawką odtwarza
+błąd, po poprawce przechodzi. Jest to test fixture, nie dowód nowego
+natywnego runu Windows. Ponowne wykonanie Windows CI z poprawką pozostaje
+PENDING; powyższe sukcesy macOS/Linux dotyczą wskazanego commita.
+
 ## Przegląd i końcowa weryfikacja lokalna
 
 Niezależny przegląd superpowers nie znalazł problemów krytycznych.

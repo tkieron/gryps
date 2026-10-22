@@ -90,6 +90,17 @@ gryps skitraj -- 'Zażółć [1].txt'
 Cytuj ścieżki ze spacjami, polskimi znakami i nawiasami. W Git Bash używaj
 np. `/c/Users/Ala Nowak/repo`; GRYPS przekazuje argumenty Gitowi i nie
 konwertuje ich samodzielnie. Używaj TAB, aby Bash prawidłowo zacytował nazwę.
+
+Dla absolutnej ścieżki POSIX zawierającej `[` lub `]` samo cytowanie nie
+wystarcza: [MSYS pomija jej automatyczną konwersję dla procesu Windows](https://github.com/git-for-windows/msys2-runtime/blob/main/winsup/cygwin/msys2_path_conv.cc).
+Jeżeli Git zgłasza np. `Invalid path '/tmp'`, użyj ścieżki względnej albo
+jawnie zamień konkretną ścieżkę pliku na zapis Windows:
+
+```bash
+gryps odkitraj -- "$(cygpath -m "$PWD/Zażółć [1].txt")"
+```
+
+Nie stosuj `cygpath` do rewizji, wyrażeń ani magicznych pathspeców, np. `:(top)`.
 Bash 3.2 używa fallbacku bez `nosort`, więc kolejność może zależeć od Readline.
 `gryps podpowiedzi` zawsze podaje opis i odpowiednik Git.
 

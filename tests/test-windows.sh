@@ -10,7 +10,8 @@ NATIVE_HOME_ROOT=$(cygpath -u "${USERPROFILE:?USERPROFILE wymagany na Windows}")
 WORK=$(mktemp -d "$NATIVE_HOME_ROOT/gryps Ala Nowak Zażółć [1].XXXXXX")
 trap 'rm -rf "$WORK"' EXIT
 VERSION=$(cat "$ROOT/VERSION")
-unzip -q "$ROOT/dist/gryps-$VERSION-windows-gitbash.zip" -d "$WORK"
+# unzip from Chocolatey is native Windows too; [] suppresses MSYS conversion.
+unzip -q "$(cygpath -m "$ROOT/dist/gryps-$VERSION-windows-gitbash.zip")" -d "$(cygpath -m "$WORK")"
 PKG="$WORK/gryps-$VERSION-windows-gitbash"
 TEST_HOME="$WORK/Ala Nowak"
 mkdir -p "$TEST_HOME"
